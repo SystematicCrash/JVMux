@@ -7,11 +7,11 @@ import com.jvmux.core.http.routing.model.route.RouteSpec;
 import java.util.HashMap;
 import java.util.List;
 
-public class RadixTree {
-    private RadixNode root;
+public class RouteTree {
+    private RouteNode root;
 
-    public static RadixTree from(List<RouteSpec> routes) throws Exception {
-        return new RadixTree().buildTree(routes);
+    public static RouteTree from(List<RouteSpec> routes) throws Exception {
+        return new RouteTree().buildTree(routes);
     }
 
     public LookupResult lookup(HttpMethod method, String path) {
@@ -32,8 +32,8 @@ public class RadixTree {
         return path.replaceAll("/+$", "");
     }
 
-    private RadixTree buildTree(List<RouteSpec> routes) throws Exception {
-        this.root = new RadixNode();
+    private RouteTree buildTree(List<RouteSpec> routes) throws Exception {
+        this.root = new RouteNode();
 
         for (var route : routes) {
             var path = this.normalizePath(route.path());

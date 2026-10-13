@@ -5,11 +5,11 @@ import com.jvmux.core.http.routing.model.route.Handler;
 import com.jvmux.core.http.routing.model.lookup.LookupKind;
 import com.jvmux.core.http.routing.model.lookup.LookupResult;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
+import java.util.Map;
 
-public class RadixNode {
-    private final Map<String, RadixNode> children = new HashMap<>();
+public class RouteNode {
+    private final Map<String, RouteNode> children = new HashMap<>();
     public final Map<HttpMethod, Handler> handlers = new HashMap<>();
 
     public LookupResult lookup(HttpMethod method, String[] segments, int idx, Map<String, String> params) {
@@ -25,8 +25,8 @@ public class RadixNode {
                         .build());
     }
 
-    public RadixNode insert(String segment) {
-        return this.children.computeIfAbsent(segment, k -> new RadixNode());
+    public RouteNode insert(String segment) {
+        return this.children.computeIfAbsent(segment, k -> new RouteNode());
     }
 
     private LookupResult lookupHandlers(HttpMethod method) {

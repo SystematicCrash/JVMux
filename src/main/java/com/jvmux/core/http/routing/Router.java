@@ -4,13 +4,14 @@ import com.jvmux.core.http.HttpMethod;
 import com.jvmux.core.http.routing.model.route.Handler;
 import com.jvmux.core.http.routing.model.route.RouteSpec;
 
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 public class Router {
-    private final Set<RouteSpec> routes = new HashSet<>();
+    private final List<RouteSpec> routes = new ArrayList<>();
 
-    public Set<RouteSpec> getRoutes() {
+    public List<RouteSpec> getRoutes() {
         return this.routes;
     }
 
@@ -22,5 +23,9 @@ public class Router {
                         .handler(handler)
                         .build()
         );
+    }
+
+    public RouteTree build() throws Exception {
+        return RouteTree.from(this.routes);
     }
 }
