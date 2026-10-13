@@ -1,8 +1,8 @@
 package com.jvmux;
 
 import com.jvmux.core.http.HttpMethod;
-import com.jvmux.core.http.routing.Router;
-import com.jvmux.core.http.routing.model.route.Handler;
+import com.jvmux.core.routing.Router;
+import com.jvmux.core.routing.Handler;
 
 import java.util.Set;
 

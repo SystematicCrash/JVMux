@@ -1,3 +1,5 @@
 .gradle/
 .idea/
 build/
+
+repomix-output.xml

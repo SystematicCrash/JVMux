@@ -1,8 +1,6 @@
-package com.jvmux.core.http.routing;
+package com.jvmux.core.routing;
 
 import com.jvmux.core.http.HttpMethod;
-import com.jvmux.core.http.routing.model.lookup.LookupResult;
-import com.jvmux.core.http.routing.model.route.RouteSpec;
 
 import java.util.HashMap;
 import java.util.List;

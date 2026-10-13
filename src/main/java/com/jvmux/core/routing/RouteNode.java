@@ -1,9 +1,7 @@
-package com.jvmux.core.http.routing;
+package com.jvmux.core.routing;
 
 import com.jvmux.core.http.HttpMethod;
-import com.jvmux.core.http.routing.model.route.Handler;
-import com.jvmux.core.http.routing.model.lookup.LookupKind;
-import com.jvmux.core.http.routing.model.lookup.LookupResult;
+
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.Map;
@@ -26,7 +24,7 @@ public class RouteNode {
     }
 
     public RouteNode insert(String segment) {
-        return this.children.computeIfAbsent(segment, k -> new RouteNode());
+        return this.children.computeIfAbsent(segment, _ -> new RouteNode());
     }
 
     private LookupResult lookupHandlers(HttpMethod method) {

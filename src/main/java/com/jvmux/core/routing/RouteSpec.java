@@ -1,4 +1,4 @@
-package com.jvmux.core.http.routing.model.route;
+package com.jvmux.core.routing;
 
 import com.jvmux.core.http.HttpMethod;
 import lombok.Builder;

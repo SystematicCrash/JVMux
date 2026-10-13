@@ -1,8 +1,6 @@
-package com.jvmux.core.http.routing;
+package com.jvmux.core.routing;
 
 import com.jvmux.core.http.HttpMethod;
-import com.jvmux.core.http.routing.model.route.Handler;
-import com.jvmux.core.http.routing.model.route.RouteSpec;
 import lombok.Getter;
 
 import java.util.ArrayList;
