@@ -1,7 +1,6 @@
-package com.jvmux.core.http.routing.model.lookup;
+package com.jvmux.core.routing;
 
 import com.jvmux.core.http.HttpMethod;
-import com.jvmux.core.http.routing.model.route.Handler;
 import lombok.Builder;
 import java.util.Map;
 import java.util.Set;

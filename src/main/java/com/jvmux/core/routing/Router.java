@@ -1,19 +1,15 @@
-package com.jvmux.core.http.routing;
+package com.jvmux.core.routing;
 
 import com.jvmux.core.http.HttpMethod;
-import com.jvmux.core.http.routing.model.route.Handler;
-import com.jvmux.core.http.routing.model.route.RouteSpec;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+@Getter
 public class Router {
     private final List<RouteSpec> routes = new ArrayList<>();
-
-    public List<RouteSpec> getRoutes() {
-        return this.routes;
-    }
 
     public void add(Set<HttpMethod> methods, String path, Handler handler) {
         this.routes.add(
