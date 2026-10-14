@@ -1,5 +1,6 @@
 package com.jvmux.core.http;
 
+import com.jvmux.core.http.parser.HttpParser;
 import com.jvmux.core.routing.RouteTree;
 import lombok.AllArgsConstructor;
 
@@ -9,7 +10,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
-import static com.jvmux.core.http.constant.HttpConstants.*;
+import static com.jvmux.core.http.constant.Constants.*;
 
 @AllArgsConstructor
 public class HttpServer {

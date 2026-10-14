@@ -1,4 +1,4 @@
-package com.jvmux.core.http;
+package com.jvmux.core.http.model;
 
 import com.jvmux.core.http.constant.HttpMethod;
 import com.jvmux.core.http.constant.HttpVersion;
