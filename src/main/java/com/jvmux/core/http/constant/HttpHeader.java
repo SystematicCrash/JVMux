@@ -1,6 +1,11 @@
 package com.jvmux.core.http.constant;
 
+import java.util.Arrays;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public enum HttpHeader {
 
@@ -84,9 +89,26 @@ public enum HttpHeader {
     X_FRAME_OPTIONS("X-Frame-Options");
 
     private final String value;
+    private final String lowerCaseName;
+
+    // Fast O(1) case-insensitive lookup table populated once at startup
+    private static final Map<String, HttpHeader> LOOKUP = Arrays.stream(values())
+            .collect(Collectors.toUnmodifiableMap(
+                    header -> header.value.toLowerCase(Locale.ROOT),
+                    Function.identity()
+            ));
 
     HttpHeader(String value) {
         this.value = value;
+        this.lowerCaseName = value.toLowerCase(Locale.ROOT);
+    }
+
+    public String value() {
+        return this.value;
+    }
+
+    public String lowerCaseName() {
+        return this.lowerCaseName;
     }
 
     @Override
@@ -94,11 +116,24 @@ public enum HttpHeader {
         return this.value;
     }
 
-    public static Optional<HttpHeader> from(String value) {
-        try {
-            return Optional.of(HttpHeader.valueOf(value.trim()));
-        } catch (Exception e) {
+    /**
+     * Case-insensitive lookup returning Optional.
+     * Zero exception overhead for unlisted/custom application headers.
+     */
+    public static Optional<HttpHeader> from(String rawName) {
+        if (rawName == null || rawName.isEmpty()) {
             return Optional.empty();
         }
+        return Optional.ofNullable(LOOKUP.get(rawName.toLowerCase(Locale.ROOT)));
+    }
+
+    /**
+     * Fast O(1) presence check without generating exceptions.
+     */
+    public static boolean contains(String rawName) {
+        if (rawName == null || rawName.isEmpty()) {
+            return false;
+        }
+        return LOOKUP.containsKey(rawName.toLowerCase(Locale.ROOT));
     }
 }

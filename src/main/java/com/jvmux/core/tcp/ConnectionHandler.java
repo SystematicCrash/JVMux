@@ -13,7 +13,7 @@ public class ConnectionHandler {
 
     public void handle(Socket socket) {
         try (socket) {
-            socket.setSoTimeout(15000);
+//            socket.setSoTimeout(15000);
             socket.setTcpNoDelay(true);
 
             while (!socket.isClosed()) {
