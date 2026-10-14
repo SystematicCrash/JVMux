@@ -8,9 +8,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 
-import static com.jvmux.core.http.HttpConstants.*;
+import static com.jvmux.core.http.constant.HttpConstants.*;
 
 @AllArgsConstructor
 public class HttpServer {
@@ -18,17 +17,17 @@ public class HttpServer {
     private final RouteTree routeTree;
 
     public void handle(InputStream in, OutputStream out) throws IOException {
-        var rawHeaders = this.readHeaders(in);
+        var raw = this.readRequest(in);
 
-        if (rawHeaders == null) return;
+        if (raw == null) {
+            return;
+        }
 
-        var requestLine = HttpParser.parseRequestLine(rawHeaders[0]);
-        var headers = HttpParser.parseHeaders(
-                Arrays.copyOfRange(rawHeaders, 1, rawHeaders.length)
-        );
+        var request = HttpParser.parseRequest(raw);
+        var handler = this.routeTree.lookup(request.method(), request.path());
     }
 
-    private String[] readHeaders(InputStream in) throws IOException {
+    private String[] readRequest(InputStream in) throws IOException {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         int state = 0;
 

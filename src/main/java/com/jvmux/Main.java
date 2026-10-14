@@ -1,6 +1,6 @@
 package com.jvmux;
 
-import com.jvmux.core.http.HttpMethod;
+import com.jvmux.core.http.constant.HttpMethod;
 import com.jvmux.core.http.HttpServer;
 import com.jvmux.core.routing.Router;
 import com.jvmux.core.routing.Handler;

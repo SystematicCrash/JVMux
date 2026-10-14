@@ -1,4 +1,4 @@
-package com.jvmux.core.http;
+package com.jvmux.core.http.constant;
 
 public enum Delimiter {
     CR("\r"),

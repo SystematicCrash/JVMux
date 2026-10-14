@@ -16,11 +16,11 @@ public class ConnectionHandler {
             socket.setSoTimeout(15000);
             socket.setTcpNoDelay(true);
 
-            var in = socket.getInputStream();
-            var out = socket.getOutputStream();
-
             while (!socket.isClosed()) {
-                http.handle(in, out);
+                http.handle(
+                        socket.getInputStream(),
+                        socket.getOutputStream()
+                );
             }
         } catch (IOException e) {
             throw new RuntimeException(e);

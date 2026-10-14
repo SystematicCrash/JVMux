@@ -1,4 +1,9 @@
-package com.jvmux.core.http;
+package com.jvmux.core.http.constant;
+
+import java.util.Arrays;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public enum HttpMethod {
     ANY("ANY"),
@@ -14,6 +19,10 @@ public enum HttpMethod {
 
     HttpMethod(String value) {
         this.value = value;
+    }
+
+    public static HttpMethod from(String value) {
+        return HttpMethod.valueOf(value.trim().toUpperCase());
     }
 
     @Override
