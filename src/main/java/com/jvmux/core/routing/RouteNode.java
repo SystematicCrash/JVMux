@@ -24,7 +24,7 @@ public class RouteNode {
     }
 
     public RouteNode insert(String segment) {
-        return this.children.computeIfAbsent(segment, _ -> new RouteNode());
+        return this.children.computeIfAbsent(segment, k -> new RouteNode());
     }
 
     private LookupResult lookupHandlers(HttpMethod method) {

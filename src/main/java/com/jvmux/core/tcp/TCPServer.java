@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import java.io.IOException;
 
 @AllArgsConstructor
-public class Server {
+public class TCPServer {
     private final int port;
     private final ConnectionHandler handler;
 
