@@ -96,12 +96,14 @@ public class HttpParser {
     }
 
     private static Pair<String, String> parseHeader(String headerLine) {
-        var parts = headerLine.split(String.valueOf(COLON));
+        var idx = headerLine.indexOf(COLON);
+        var name = headerLine.substring(0, idx);
+        var value = headerLine.substring(idx + 1);
 
-        if (parts.length != 2) {
+        if (name.isEmpty() || value.isEmpty()) {
             throw new IllegalArgumentException("Bad headers format");
         }
 
-        return new Pair<>(parts[0].trim(), parts[1].trim());
+        return new Pair<>(name.trim(), value.trim());
     }
 }
