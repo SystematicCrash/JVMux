@@ -9,12 +9,13 @@ import java.nio.charset.StandardCharsets;
 import static com.jvmux.core.http.constant.Constants.CRLF;
 import static com.jvmux.core.http.constant.Constants.SP;
 
-public class HeaderEncoder {
+public class ResponseEncoder {
 
     public static byte[] encode(HttpResponse response) {
         var str = new StringBuilder();
 
-        str.append(encodeResponseLine(response.version(), response.status()));
+        str.append(encodeResponseLine(response.version(), response.status()))
+                .append(CRLF);
 
         for (var header : response.headers().entrySet()) {
             str.append(header.getKey())

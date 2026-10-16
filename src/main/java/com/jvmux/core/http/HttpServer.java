@@ -1,20 +1,17 @@
 package com.jvmux.core.http;
 
 import com.jvmux.core.http.constant.HttpVersion;
-import com.jvmux.core.http.encoder.HeaderEncoder;
+import com.jvmux.core.http.encoder.ResponseEncoder;
 import com.jvmux.core.http.error.HttpException;
-import com.jvmux.core.http.model.HttpRequest;
 import com.jvmux.core.http.model.HttpResponse;
-import com.jvmux.core.http.parser.HeaderParser;
+import com.jvmux.core.http.parser.RequestParser;
 import com.jvmux.core.routing.RouteTree;
 import lombok.AllArgsConstructor;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 
 import static com.jvmux.core.http.constant.Constants.*;
-import static com.jvmux.core.http.parser.RequestLineParser.parse;
 
 @AllArgsConstructor
 public class HttpServer {
@@ -28,7 +25,7 @@ public class HttpServer {
             return false;
         }
 
-        var request = this.parseRequest(raw);
+        var request = RequestParser.parse(raw);
         var handler = this.routeTree.lookup(
                 request.startLine().method(), request.startLine().path()
         );
@@ -40,18 +37,6 @@ public class HttpServer {
 
         this.writeResponse(out, response);
         return true;
-    }
-
-    private HttpRequest parseRequest(String[] raw) {
-        var requestLine = parse(raw[0]);
-        var headers = HeaderParser.parse(
-                Arrays.copyOfRange(raw, 1, raw.length)
-        );
-
-        return HttpRequest.builder()
-                .startLine(requestLine)
-                .headers(headers)
-                .build();
     }
 
     private String[] readRequest(InputStream in) throws IOException {
@@ -89,6 +74,6 @@ public class HttpServer {
     }
 
     private void writeResponse(OutputStream out, HttpResponse response) throws IOException {
-        out.write(HeaderEncoder.encode(response));
+        out.write(ResponseEncoder.encode(response));
     }
 }
