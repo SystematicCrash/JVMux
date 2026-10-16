@@ -1,14 +1,17 @@
 package com.jvmux.core.http;
 
 import com.jvmux.core.http.error.HttpException;
-import com.jvmux.core.http.parser.HttpParser;
+import com.jvmux.core.http.model.HttpRequest;
 import com.jvmux.core.routing.RouteTree;
 import lombok.AllArgsConstructor;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 import static com.jvmux.core.http.constant.Constants.*;
+import static com.jvmux.core.http.parser.HeaderParser.parseHeaders;
+import static com.jvmux.core.http.parser.RequestLineParser.parseRequestLine;
 
 @AllArgsConstructor
 public class HttpServer {
@@ -22,10 +25,24 @@ public class HttpServer {
             return false;
         }
 
-        var request = HttpParser.parseRequest(raw);
+        var request = this.parseRequest(raw);
         var handler = this.routeTree.lookup(request.method(), request.path());
 
         return true;
+    }
+
+    private HttpRequest parseRequest(String[] raw) {
+        var requestLine = parseRequestLine(raw[0]);
+        var headers = parseHeaders(
+                Arrays.copyOfRange(raw, 1, raw.length)
+        );
+
+        return HttpRequest.builder()
+                .path(requestLine.path())
+                .method(requestLine.method())
+                .version(requestLine.version())
+                .headers(headers)
+                .build();
     }
 
     private String[] readRequest(InputStream in) throws IOException {
