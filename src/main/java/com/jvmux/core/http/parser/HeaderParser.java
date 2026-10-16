@@ -10,7 +10,7 @@ import java.util.Map;
 import static com.jvmux.core.http.constant.Constants.*;
 
 public class HeaderParser {
-    public static Map<String, String> parseHeaders(String[] raw) {
+    public static Map<String, String> parse(String[] raw) {
         var parsed = new HashMap<String, String>();
 
         if (raw.length == 0) {

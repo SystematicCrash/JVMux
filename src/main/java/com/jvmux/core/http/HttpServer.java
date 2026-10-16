@@ -1,7 +1,12 @@
 package com.jvmux.core.http;
 
+import com.jvmux.core.http.constant.HttpVersion;
+import com.jvmux.core.http.encoder.HeaderEncoder;
+import com.jvmux.core.http.encoder.ResponseLineEncoder;
 import com.jvmux.core.http.error.HttpException;
 import com.jvmux.core.http.model.HttpRequest;
+import com.jvmux.core.http.model.HttpResponse;
+import com.jvmux.core.http.parser.HeaderParser;
 import com.jvmux.core.routing.RouteTree;
 import lombok.AllArgsConstructor;
 
@@ -10,8 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import static com.jvmux.core.http.constant.Constants.*;
-import static com.jvmux.core.http.parser.HeaderParser.parseHeaders;
-import static com.jvmux.core.http.parser.RequestLineParser.parseRequestLine;
+import static com.jvmux.core.http.parser.RequestLineParser.parse;
 
 @AllArgsConstructor
 public class HttpServer {
@@ -26,21 +30,27 @@ public class HttpServer {
         }
 
         var request = this.parseRequest(raw);
-        var handler = this.routeTree.lookup(request.method(), request.path());
+        var handler = this.routeTree.lookup(
+                request.startLine().method(), request.startLine().path()
+        );
 
+        var response = HttpResponse.builder()
+                .status(429)
+                .version(HttpVersion.HTTP_1_1)
+                .build();
+
+        this.writeResponse(out, response);
         return true;
     }
 
     private HttpRequest parseRequest(String[] raw) {
-        var requestLine = parseRequestLine(raw[0]);
-        var headers = parseHeaders(
+        var requestLine = parse(raw[0]);
+        var headers = HeaderParser.parse(
                 Arrays.copyOfRange(raw, 1, raw.length)
         );
 
         return HttpRequest.builder()
-                .path(requestLine.path())
-                .method(requestLine.method())
-                .version(requestLine.version())
+                .startLine(requestLine)
                 .headers(headers)
                 .build();
     }
@@ -77,5 +87,10 @@ public class HttpServer {
         return buffer
                 .toString(StandardCharsets.US_ASCII)
                 .split(CRLF);
+    }
+
+    private void writeResponse(OutputStream out, HttpResponse response) throws IOException {
+        out.write(ResponseLineEncoder.encode(response.version(), response.status()));
+        out.write(HeaderEncoder.encode(response.headers()));
     }
 }

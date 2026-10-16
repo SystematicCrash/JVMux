@@ -7,7 +7,7 @@ import static com.jvmux.core.http.constant.Constants.CRLF;
 
 public class HeaderEncoder {
 
-    public static byte[] encoderHeaders(Map<String, String> headers) {
+    public static byte[] encode(Map<String, String> headers) {
         var str = new StringBuilder();
 
         for (var header : headers.entrySet()) {

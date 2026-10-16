@@ -9,7 +9,7 @@ import static com.jvmux.core.http.constant.Constants.*;
 import static com.jvmux.core.http.constant.Constants.VALID_VERSIONS;
 
 public class RequestLineParser {
-    public static RequestLine parseRequestLine(String line) {
+    public static RequestLine parse(String line) {
         if (line.length() > MAX_REQUEST_LINE_LEN) {
             throw HttpException.badRequest("Bad headers");
         }
