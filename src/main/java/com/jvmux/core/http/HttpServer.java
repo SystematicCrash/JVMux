@@ -2,7 +2,6 @@ package com.jvmux.core.http;
 
 import com.jvmux.core.http.constant.HttpVersion;
 import com.jvmux.core.http.encoder.HeaderEncoder;
-import com.jvmux.core.http.encoder.ResponseLineEncoder;
 import com.jvmux.core.http.error.HttpException;
 import com.jvmux.core.http.model.HttpRequest;
 import com.jvmux.core.http.model.HttpResponse;
@@ -90,7 +89,6 @@ public class HttpServer {
     }
 
     private void writeResponse(OutputStream out, HttpResponse response) throws IOException {
-        out.write(ResponseLineEncoder.encode(response.version(), response.status()));
-        out.write(HeaderEncoder.encode(response.headers()));
+        out.write(HeaderEncoder.encode(response));
     }
 }
