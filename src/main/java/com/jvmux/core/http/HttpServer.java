@@ -1,7 +1,7 @@
 package com.jvmux.core.http;
 
-import com.jvmux.core.http.constant.HttpVersion;
 import com.jvmux.core.http.encoder.ResponseEncoder;
+import com.jvmux.core.http.error.ErrorHandler;
 import com.jvmux.core.http.error.HttpException;
 import com.jvmux.core.http.model.HttpResponse;
 import com.jvmux.core.http.parser.RequestParser;
@@ -19,24 +19,39 @@ public class HttpServer {
     private final RouteTree routeTree;
 
     public boolean handle(InputStream in, OutputStream out) throws IOException {
-        var raw = this.readRequest(in);
+        String[] raw;
+
+        try {
+            raw = this.readRequest(in);
+        } catch (HttpException e) {
+            this.writeResponse(out, ErrorHandler.toResponse(e));
+            return false;
+        }
 
         if (raw == null) {
             return false;
         }
 
-        var request = RequestParser.parse(raw);
-        var handler = this.routeTree.lookup(
-                request.startLine().method(), request.startLine().path()
-        );
-
-        var response = HttpResponse.builder()
-                .status(429)
-                .version(HttpVersion.HTTP_1_1)
-                .build();
+        var response = this.dispatch(raw);
 
         this.writeResponse(out, response);
-        return true;
+        return response.status() < 400;
+    }
+
+    private HttpResponse dispatch(String[] raw) {
+        try {
+            var request = RequestParser.parse(raw);
+            var handler = this.routeTree.lookup(
+                    request.startLine().method(), request.startLine().path()
+            );
+
+            return HttpResponse.builder()
+                    .status(429)
+                    .version(request.startLine().version())
+                    .build();
+        } catch (Exception error) {
+            return ErrorHandler.toResponse(error);
+        }
     }
 
     private String[] readRequest(InputStream in) throws IOException {
