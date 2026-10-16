@@ -1,13 +1,11 @@
 package com.jvmux.core.http;
 
+import com.jvmux.core.http.error.HttpException;
 import com.jvmux.core.http.parser.HttpParser;
 import com.jvmux.core.routing.RouteTree;
 import lombok.AllArgsConstructor;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 
 import static com.jvmux.core.http.constant.Constants.*;
@@ -17,15 +15,17 @@ public class HttpServer {
 
     private final RouteTree routeTree;
 
-    public void handle(InputStream in, OutputStream out) throws IOException {
+    public boolean handle(InputStream in, OutputStream out) throws IOException {
         var raw = this.readRequest(in);
 
         if (raw == null) {
-            return;
+            return false;
         }
 
         var request = HttpParser.parseRequest(raw);
         var handler = this.routeTree.lookup(request.method(), request.path());
+
+        return true;
     }
 
     private String[] readRequest(InputStream in) throws IOException {
@@ -39,13 +39,13 @@ public class HttpServer {
                 if (buffer.size() == 0) {
                     return null;
                 }
-                throw new IOException("Client closed connection prematurely before completing HTTP header");
+                throw new EOFException("Unexpected EOF while reading request");
             }
 
             buffer.write(b);
 
             if (buffer.size() > MAX_HEADER_SIZE) {
-                throw new IOException("HTTP header section exceeds maximum allowed size (" + MAX_HEADER_SIZE + " bytes)");
+                throw HttpException.headersToLarge();
             }
 
             if ((state == 0 || state == 2) && b == CR) {

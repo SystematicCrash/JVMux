@@ -1,5 +1,6 @@
 package com.jvmux.core.http.parser;
 
+import com.jvmux.core.http.error.HttpException;
 import com.jvmux.util.Pair;
 
 import java.util.Arrays;
@@ -13,7 +14,7 @@ public class HeaderParser {
         var parsed = new HashMap<String, String>();
 
         if (raw.length == 0) {
-            throw new IllegalArgumentException("Bad headers format");
+            throw HttpException.badRequest("Bad headers");
         }
 
         int totalLength = Arrays.stream(raw).reduce(0,
@@ -21,10 +22,10 @@ public class HeaderParser {
         );
 
         if (totalLength > MAX_HEADER_SIZE) {
-            throw new IllegalArgumentException("Bad headers format");
+            throw HttpException.badRequest("Bad headers");
         }
         if (raw.length > MAX_HEADER_COUNT) {
-            throw new IllegalArgumentException("Bad headers format");
+            throw HttpException.badRequest("Bad headers");
         }
 
         for (var rawHeader : raw) {
@@ -32,14 +33,14 @@ public class HeaderParser {
 
             if (parsed.containsKey(header.key())) {
                 if (UNIQUE_HEADERS.contains(header.key()))
-                    throw new IllegalArgumentException("Bad headers format");
+                    throw HttpException.badRequest("Bad headers");
             }
 
             parsed.put(header.key(), header.value());
         }
 
         if (!parsed.keySet().containsAll(MANDATORY_HEADERS)) {
-            throw new IllegalArgumentException("Bad headers format");
+            throw HttpException.badRequest("Bad headers");
         }
 
         return parsed;
@@ -51,7 +52,7 @@ public class HeaderParser {
         var value = headerLine.substring(idx + 1);
 
         if (name.isEmpty() || value.isEmpty()) {
-            throw new IllegalArgumentException("Bad headers format");
+            throw HttpException.badRequest("Bad headers");
         }
 
         return new Pair<>(name.trim(), value.trim());

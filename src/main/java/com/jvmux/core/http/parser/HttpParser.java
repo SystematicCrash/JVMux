@@ -1,9 +1,7 @@
 package com.jvmux.core.http.parser;
 
-import com.jvmux.core.http.constant.HttpMethod;
-import com.jvmux.core.http.constant.HttpVersion;
 import com.jvmux.core.http.model.HttpRequest;
-import com.jvmux.core.http.model.RequestLine;
+
 import java.util.*;
 
 import static com.jvmux.core.http.parser.HeaderParser.parseHeaders;

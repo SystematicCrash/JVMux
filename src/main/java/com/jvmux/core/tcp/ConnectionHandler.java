@@ -16,8 +16,10 @@ public class ConnectionHandler {
             socket.setSoTimeout(3000);
             socket.setTcpNoDelay(true);
 
-            while (!socket.isClosed()) {
-                http.handle(
+            var keepAlive = true;
+
+            while (!socket.isClosed() && keepAlive) {
+                keepAlive = http.handle(
                         socket.getInputStream(),
                         socket.getOutputStream()
                 );

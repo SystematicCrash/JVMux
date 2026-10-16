@@ -1,5 +1,10 @@
 plugins {
     id("java")
+    application
+}
+
+application {
+    mainClass.set("com.jvmux.Main")
 }
 
 group = "com.jvmux"
