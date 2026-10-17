@@ -23,19 +23,21 @@ public class HttpServer {
 
         try {
             raw = this.readRequest(in);
+            throw HttpException.badRequest("Fuck you");
+
         } catch (HttpException e) {
             this.writeResponse(out, ErrorHandler.toResponse(e));
             return false;
         }
 
-        if (raw == null) {
-            return false;
-        }
-
-        var response = this.dispatch(raw);
-
-        this.writeResponse(out, response);
-        return response.status() < 400;
+//        if (raw == null) {
+//            return false;
+//        }
+//
+//        var response = this.dispatch(raw);
+//
+//        this.writeResponse(out, response);
+//        return response.status() < 400;
     }
 
     private HttpResponse dispatch(String[] raw) {

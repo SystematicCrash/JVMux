@@ -9,5 +9,6 @@ import java.util.Map;
 public record HttpResponse(
         HttpVersion version,
         int status,
-        Map<String, String> headers
+        Map<String, String> headers,
+        String body
 ) {}
