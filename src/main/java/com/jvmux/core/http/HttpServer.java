@@ -30,20 +30,21 @@ public class HttpServer {
         if (raw == null)
             return false;
 
-        var response = this.dispatch(raw);
+        var response = this.dispatch(raw, in);
         return this.writeResponse(out, response);
     }
 
-    private HttpResponse dispatch(String[] raw) {
+    private HttpResponse dispatch(String[] raw, InputStream body) {
         try {
-            var request = RequestParser.parse(raw);
+            var request = RequestParser.parse(raw, body);
             var handler = this.routeTree.lookup(
-                    request.startLine().method(), request.startLine().path()
+                    request.requestLine().method(), request.requestLine().path()
             );
 
             return HttpResponse.builder()
                     .status(429)
-                    .version(request.startLine().version())
+                    .version(request.requestLine().version())
+                    .body("Fuck you")
                     .build();
         } catch (Exception error) {
             return ErrorHandler.toResponse(error);

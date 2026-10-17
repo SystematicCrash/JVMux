@@ -10,7 +10,7 @@ import java.util.Map;
 public record HttpResponse(
         HttpVersion version,
         int status,
-        Map<HttpHeader, String> headers,
+        Map<String, String> headers,
         String body
 ) {
     public static HttpResponse empty(int status) {
@@ -18,8 +18,8 @@ public record HttpResponse(
                 .version(HttpVersion.HTTP_1_1)
                 .status(status)
                 .headers(Map.of(
-                        HttpHeader.HOST, "JVMux",
-                        HttpHeader.CONTENT_LENGTH, "0"
+                        HttpHeader.HOST.value(), "JVMux",
+                        HttpHeader.CONTENT_LENGTH.value(), "0"
                 )).build();
     }
 
@@ -28,9 +28,9 @@ public record HttpResponse(
                 .version(HttpVersion.HTTP_1_1)
                 .status(status)
                 .headers(Map.of(
-                        HttpHeader.HOST, "JVMux",
-                        HttpHeader.CONTENT_LENGTH, String.valueOf(text.length()),
-                        HttpHeader.CONTENT_TYPE, "text/plain"
+                        HttpHeader.HOST.value(), "JVMux",
+                        HttpHeader.CONTENT_LENGTH.value(), String.valueOf(text.length()),
+                        HttpHeader.CONTENT_TYPE.value(), "text/plain"
                 ))
                 .body(text)
                 .build();

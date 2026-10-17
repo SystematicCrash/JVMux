@@ -2,10 +2,12 @@ package com.jvmux.core.http.model;
 
 import lombok.Builder;
 
+import java.io.InputStream;
 import java.util.Map;
 
 @Builder
 public record HttpRequest(
-        RequestLine startLine,
-        Map<String, String> headers
+        RequestLine requestLine,
+        Map<String, String> headers,
+        InputStream body
 ) {}

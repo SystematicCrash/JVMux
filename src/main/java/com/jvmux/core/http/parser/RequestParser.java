@@ -16,15 +16,20 @@ import static com.jvmux.core.http.constant.Constants.*;
 public class RequestParser {
 
     public static HttpRequest parse(String[] raw) {
+        return parse(raw, null);
+    }
+
+    public static HttpRequest parse(String[] raw, java.io.InputStream body) {
         if (raw.length == 0) {
             throw HttpException.badRequest("Bad Request");
         }
 
         return HttpRequest.builder()
-                .startLine(parseRequestLine(raw[0]))
+                .requestLine(parseRequestLine(raw[0]))
                 .headers(parseHeaders(
                         Arrays.copyOfRange(raw, 1, raw.length)
                 ))
+                .body(body)
                 .build();
     }
 
@@ -110,5 +115,4 @@ public class RequestParser {
                 .version(HttpVersion.from(version))
                 .build();
     }
-
 }
