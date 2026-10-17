@@ -1,10 +1,10 @@
 package com.jvmux.core.http;
 
-import com.jvmux.core.http.encoder.ResponseEncoder;
 import com.jvmux.core.http.error.ErrorHandler;
 import com.jvmux.core.http.error.HttpException;
+import com.jvmux.core.http.model.HttpRequest;
 import com.jvmux.core.http.model.HttpResponse;
-import com.jvmux.core.http.parser.RequestParser;
+import com.jvmux.core.http.stream.ResponseWriter;
 import com.jvmux.core.routing.RouteTree;
 import lombok.AllArgsConstructor;
 
@@ -19,39 +19,32 @@ public class HttpServer {
     private final RouteTree routeTree;
 
     public boolean handle(InputStream in, OutputStream out) {
-        String[] raw;
-
         try {
-            raw = this.readRequest(in);
+            var req = this.readRequest(in);
+            if (req == null) {
+                return false;
+            }
+
+            var response = this.dispatch(req);
+            return writeResponse(response, out);
         } catch (HttpException | IOException e) {
-            return this.writeResponse(out, ErrorHandler.toResponse(e));
+            return this.writeResponse(ErrorHandler.toResponse(e), out);
         }
-
-        if (raw == null)
-            return false;
-
-        var response = this.dispatch(raw, in);
-        return this.writeResponse(out, response);
     }
 
-    private HttpResponse dispatch(String[] raw, InputStream body) {
+    private HttpResponse dispatch(HttpRequest request) {
         try {
-            var request = RequestParser.parse(raw, body);
             var handler = this.routeTree.lookup(
                     request.requestLine().method(), request.requestLine().path()
             );
 
-            return HttpResponse.builder()
-                    .status(429)
-                    .version(request.requestLine().version())
-                    .body("Fuck you")
-                    .build();
+            return HttpResponse.text(400, "fuck you");
         } catch (Exception error) {
             return ErrorHandler.toResponse(error);
         }
     }
 
-    private String[] readRequest(InputStream in) throws IOException {
+    private HttpRequest readRequest(InputStream in) throws IOException {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         int state = 0;
 
@@ -80,14 +73,16 @@ public class HttpServer {
             }
         }
 
-        return buffer
+        var raw = buffer
                 .toString(StandardCharsets.US_ASCII)
-                .split(CRLF);
+                .split("\n");
+
+        return HttpRequest.from(raw, in);
     }
 
-    private boolean writeResponse(OutputStream out, HttpResponse response) {
+    private boolean writeResponse(HttpResponse response, OutputStream out) {
         try {
-            out.write(ResponseEncoder.encode(response));
+            ResponseWriter.write(response, out);
             return true;
         } catch (IOException e) {
             return false;

@@ -26,20 +26,11 @@ public class ResponseEncoder {
             str.append(CRLF);
         }
 
-        str.append(encodeBody(response.body()));
         return str.toString().getBytes(StandardCharsets.US_ASCII);
     }
 
     private static String encodeHeader(String key, String value) {
         return key + ": " + value + CRLF;
-    }
-
-    private static String encodeBody(String body) {
-        if (body == null || body.isEmpty()) {
-            return "";
-        }
-
-        return body + CRLF;
     }
 
     private static String encodeResponseLine(HttpVersion version, int status) {

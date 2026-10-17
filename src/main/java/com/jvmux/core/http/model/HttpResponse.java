@@ -2,37 +2,58 @@ package com.jvmux.core.http.model;
 
 import com.jvmux.core.http.constant.HttpHeader;
 import com.jvmux.core.http.constant.HttpVersion;
+import com.jvmux.core.http.encoder.ResponseEncoder;
 import lombok.Builder;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 @Builder
 public record HttpResponse(
-        HttpVersion version,
         int status,
+        HttpVersion version,
         Map<String, String> headers,
-        String body
+        InputStream body
 ) {
+
     public static HttpResponse empty(int status) {
-        return HttpResponse.builder()
+        var res = HttpResponse.builder()
                 .version(HttpVersion.HTTP_1_1)
                 .status(status)
-                .headers(Map.of(
-                        HttpHeader.HOST.value(), "JVMux",
-                        HttpHeader.CONTENT_LENGTH.value(), "0"
-                )).build();
+                .build();
+
+        res.setHeader(HttpHeader.CONTENT_LENGTH, 0);
+        return res.applyDefaultFraming();
     }
 
     public static HttpResponse text(int status, String text) {
-        return HttpResponse.builder()
+        var res = HttpResponse.builder()
                 .version(HttpVersion.HTTP_1_1)
                 .status(status)
-                .headers(Map.of(
-                        HttpHeader.HOST.value(), "JVMux",
-                        HttpHeader.CONTENT_LENGTH.value(), String.valueOf(text.length()),
-                        HttpHeader.CONTENT_TYPE.value(), "text/plain"
-                ))
-                .body(text)
+                .body(new ByteArrayInputStream(text.getBytes(StandardCharsets.US_ASCII)))
                 .build();
+
+        res.setHeader(HttpHeader.CONTENT_LENGTH, text.length());
+        res.setHeader(HttpHeader.CONTENT_TYPE, "text/plain");
+        return res.applyDefaultFraming();
+    }
+
+    public String getHeader(HttpHeader name) {
+        return this.headers.get(name.value());
+    }
+
+    public void setHeader(HttpHeader header, Object value) {
+        this.headers.put(header.value(), String.valueOf(value));
+    }
+
+    public byte[] encode() {
+        return ResponseEncoder.encode(this);
+    }
+
+    private HttpResponse applyDefaultFraming() {
+        this.setHeader(HttpHeader.HOST, "JVMux");
+        return this;
     }
 }
