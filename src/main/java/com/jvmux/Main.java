@@ -11,7 +11,8 @@ import java.util.Set;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        var router = new Router();
+       System.out.println("Application is up and running..."); 
+       var router = new Router();
 
         router.add(Set.of(HttpMethod.GET), "/users/profile", new Handler());
         router.add(Set.of(HttpMethod.POST), "/users/profile", new Handler());

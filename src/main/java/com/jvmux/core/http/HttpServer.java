@@ -1,30 +1,57 @@
 package com.jvmux.core.http;
 
+import com.jvmux.core.http.encoder.ResponseEncoder;
+import com.jvmux.core.http.error.ErrorHandler;
+import com.jvmux.core.http.error.HttpException;
+import com.jvmux.core.http.model.HttpResponse;
+import com.jvmux.core.http.parser.RequestParser;
 import com.jvmux.core.routing.RouteTree;
 import lombok.AllArgsConstructor;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 
-import static com.jvmux.core.http.constant.HttpConstants.*;
+import static com.jvmux.core.http.constant.Constants.*;
 
 @AllArgsConstructor
 public class HttpServer {
 
     private final RouteTree routeTree;
 
-    public void handle(InputStream in, OutputStream out) throws IOException {
-        var raw = this.readRequest(in);
+    public boolean handle(InputStream in, OutputStream out) throws IOException {
+        String[] raw;
 
-        if (raw == null) {
-            return;
+        try {
+            raw = this.readRequest(in);
+        } catch (HttpException e) {
+            this.writeResponse(out, ErrorHandler.toResponse(e));
+            return false;
         }
 
-        var request = HttpParser.parseRequest(raw);
-        var handler = this.routeTree.lookup(request.method(), request.path());
+        if (raw == null) {
+            return false;
+        }
+
+        var response = this.dispatch(raw);
+
+        this.writeResponse(out, response);
+        return response.status() < 400;
+    }
+
+    private HttpResponse dispatch(String[] raw) {
+        try {
+            var request = RequestParser.parse(raw);
+            var handler = this.routeTree.lookup(
+                    request.startLine().method(), request.startLine().path()
+            );
+
+            return HttpResponse.builder()
+                    .status(429)
+                    .version(request.startLine().version())
+                    .build();
+        } catch (Exception error) {
+            return ErrorHandler.toResponse(error);
+        }
     }
 
     private String[] readRequest(InputStream in) throws IOException {
@@ -38,13 +65,13 @@ public class HttpServer {
                 if (buffer.size() == 0) {
                     return null;
                 }
-                throw new IOException("Client closed connection prematurely before completing HTTP header");
+                throw new EOFException("Unexpected EOF while reading request");
             }
 
             buffer.write(b);
 
             if (buffer.size() > MAX_HEADER_SIZE) {
-                throw new IOException("HTTP header section exceeds maximum allowed size (" + MAX_HEADER_SIZE + " bytes)");
+                throw HttpException.headersToLarge();
             }
 
             if ((state == 0 || state == 2) && b == CR) {
@@ -59,5 +86,9 @@ public class HttpServer {
         return buffer
                 .toString(StandardCharsets.US_ASCII)
                 .split(CRLF);
+    }
+
+    private void writeResponse(OutputStream out, HttpResponse response) throws IOException {
+        out.write(ResponseEncoder.encode(response));
     }
 }

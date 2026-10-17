@@ -1,11 +1,10 @@
 package com.jvmux.core.http.constant;
 
 import java.util.Set;
-import java.util.regex.Pattern;
 
-public final class HttpConstants {
+public final class Constants {
 
-    private HttpConstants() {}
+    private Constants() {}
 
     // Primitives for fast byte-level stream inspection
     public static final char CR = '\r';
@@ -22,9 +21,6 @@ public final class HttpConstants {
     public static final int MAX_REQUEST_LINE_LEN = 8 * 1024;
 
     // validation
-    public static final Pattern REQUEST_LINE_PATTERN = Pattern.compile(
-            "^(?<method>[!#$%&'*+\\-.^_`|~0-9a-zA-Z]+) (?<target>[\\x21-\\x7E]+) HTTP/(?<version>\\d+\\.\\d+)$"
-    );
     public static final Set<String> VALID_METHODS = Set.of(
             HttpMethod.GET.toString(),
             HttpMethod.HEAD.toString(),
