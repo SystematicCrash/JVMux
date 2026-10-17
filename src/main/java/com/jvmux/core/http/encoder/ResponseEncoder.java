@@ -14,17 +14,29 @@ public class ResponseEncoder {
     public static byte[] encode(HttpResponse response) {
         var str = new StringBuilder();
 
-        str.append(encodeResponseLine(response.version(), response.status()))
-                .append(CRLF);
+        str.append(encodeResponseLine(response.version(), response.status()));
 
-        for (var header : response.headers().entrySet()) {
-            str.append(header.getKey())
-                    .append(": ")
-                    .append(header.getValue())
-                    .append(CRLF);
+        if (response.headers() != null) {
+            for (var header : response.headers().entrySet()) {
+               str.append(encodeHeader(header.getKey(), header.getValue()));
+            }
+            str.append(CRLF);
         }
 
+        str.append(encodeBody(response.body()));
         return str.toString().getBytes(StandardCharsets.US_ASCII);
+    }
+
+    private static String encodeHeader(String key, String value) {
+        return key + ": " + value + CRLF;
+    }
+
+    private static String encodeBody(String body) {
+        if (body == null || body.isEmpty()) {
+            return "";
+        }
+
+        return body + CRLF;
     }
 
     private static String encodeResponseLine(HttpVersion version, int status) {

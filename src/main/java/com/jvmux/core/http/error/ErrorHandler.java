@@ -4,19 +4,35 @@ import com.jvmux.core.http.constant.HttpHeader;
 import com.jvmux.core.http.constant.HttpVersion;
 import com.jvmux.core.http.model.HttpResponse;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 public final class ErrorHandler {
 
     private static final int DEFAULT_STATUS = 500;
+    private static final String DEFAULT_MESSAGE = "Internal Server Error";
+    private static final String CONTENT_TYPE = "text/plain";
 
     private ErrorHandler() {}
 
     public static HttpResponse toResponse(Throwable error) {
+        return toResponse(error, HttpVersion.HTTP_1_1);
+    }
+
+    public static HttpResponse toResponse(Throwable error, HttpVersion version) {
+        var status = statusOf(error);
+        var body = bodyOf(error);
+        var contentLength = body.getBytes(StandardCharsets.US_ASCII).length;
+
         return HttpResponse.builder()
-                .version(HttpVersion.HTTP_1_1)
-                .status(statusOf(error))
-                .headers(errorHeaders())
+                .version(version)
+                .status(status)
+                .headers(Map.of(
+                        HttpHeader.CONTENT_LENGTH.value(), Integer.toString(contentLength),
+                        HttpHeader.CONTENT_TYPE.value(), CONTENT_TYPE,
+                        HttpHeader.CONNECTION.value(), "close"
+                ))
+                .body(body)
                 .build();
     }
 
@@ -27,10 +43,13 @@ public final class ErrorHandler {
         return DEFAULT_STATUS;
     }
 
-    private static Map<String, String> errorHeaders() {
-        return Map.of(
-                HttpHeader.CONTENT_LENGTH.value(), "0",
-                HttpHeader.CONNECTION.value(), "close"
-        );
+    private static String bodyOf(Throwable error) {
+        if (error instanceof HttpException exception) {
+            var message = exception.getMessage();
+            if (message != null && !message.isEmpty()) {
+                return message;
+            }
+        }
+        return DEFAULT_MESSAGE;
     }
 }
