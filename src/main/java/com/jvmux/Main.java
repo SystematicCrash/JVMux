@@ -4,9 +4,9 @@ import com.jvmux.core.http.constant.HttpMethod;
 import com.jvmux.core.http.HttpServer;
 import com.jvmux.core.routing.Router;
 import com.jvmux.core.routing.Handler;
-import com.jvmux.core.tcp.ConnectionHandler;
 import com.jvmux.core.tcp.TCPServer;
 
+import java.io.IOException;
 import java.util.Set;
 
 public class Main {
@@ -20,8 +20,7 @@ public class Main {
 
         var routeTree = router.build();
         var httpServer = new HttpServer(routeTree);
-        var connHandler = new ConnectionHandler(httpServer);
-        var tcpServer = new TCPServer(1234, connHandler);
+        var tcpServer = new TCPServer(1234, httpServer::handle);
 
         tcpServer.start();
     }

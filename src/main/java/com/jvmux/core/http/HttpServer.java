@@ -18,26 +18,20 @@ public class HttpServer {
 
     private final RouteTree routeTree;
 
-    public boolean handle(InputStream in, OutputStream out) throws IOException {
+    public boolean handle(InputStream in, OutputStream out) {
         String[] raw;
 
         try {
             raw = this.readRequest(in);
-            throw HttpException.badRequest("Fuck you");
-
-        } catch (HttpException e) {
-            this.writeResponse(out, ErrorHandler.toResponse(e));
-            return false;
+        } catch (HttpException | IOException e) {
+            return this.writeResponse(out, ErrorHandler.toResponse(e));
         }
 
-//        if (raw == null) {
-//            return false;
-//        }
-//
-//        var response = this.dispatch(raw);
-//
-//        this.writeResponse(out, response);
-//        return response.status() < 400;
+        if (raw == null)
+            return false;
+
+        var response = this.dispatch(raw);
+        return this.writeResponse(out, response);
     }
 
     private HttpResponse dispatch(String[] raw) {
@@ -90,7 +84,12 @@ public class HttpServer {
                 .split(CRLF);
     }
 
-    private void writeResponse(OutputStream out, HttpResponse response) throws IOException {
-        out.write(ResponseEncoder.encode(response));
+    private boolean writeResponse(OutputStream out, HttpResponse response) {
+        try {
+            out.write(ResponseEncoder.encode(response));
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
     }
 }
