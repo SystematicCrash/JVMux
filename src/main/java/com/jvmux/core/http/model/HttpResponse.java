@@ -31,7 +31,7 @@ public record HttpResponse(
                 .status(status)
                 .build();
 
-        res.setHeader(HttpHeader.CONTENT_LENGTH, 0);
+        res.setHeader(HttpHeader.CONTENT_LENGTH, "0");
         return res.applyDefaultFraming();
     }
 
@@ -42,17 +42,17 @@ public record HttpResponse(
                 .body(new ByteArrayInputStream(text.getBytes(StandardCharsets.US_ASCII)))
                 .build();
 
-        res.setHeader(HttpHeader.CONTENT_LENGTH, text.length());
+        res.setHeader(HttpHeader.CONTENT_LENGTH, String.valueOf(text.length()));
         res.setHeader(HttpHeader.CONTENT_TYPE, "text/plain");
         return res.applyDefaultFraming();
     }
 
-    public String getHeader(HttpHeader name) {
-        return this.headers.get(name.value());
+    public String getHeader(String name) {
+        return this.headers.get(name);
     }
 
-    public void setHeader(HttpHeader header, Object value) {
-        this.headers.put(header.value(), String.valueOf(value));
+    public void setHeader(String header, String value) {
+        this.headers.put(header, value);
     }
 
     public byte[] encode() {

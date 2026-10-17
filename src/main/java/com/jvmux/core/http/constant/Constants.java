@@ -23,22 +23,22 @@ public final class Constants {
 
     // validation
     public static final Set<String> VALID_METHODS = Set.of(
-            HttpMethod.GET.value(),
-            HttpMethod.HEAD.value(),
-            HttpMethod.OPTIONS.value(),
-            HttpMethod.DELETE.value(),
-            HttpMethod.POST.value(),
-            HttpMethod.PATCH.value()
+            HttpMethod.GET.toString(),
+            HttpMethod.HEAD.toString(),
+            HttpMethod.OPTIONS.toString(),
+            HttpMethod.DELETE.toString(),
+            HttpMethod.POST.toString(),
+            HttpMethod.PATCH.toString()
     );
     public static final Set<String> VALID_VERSIONS = Set.of(
-            HttpVersion.HTTP_1_1.value()
+            HttpVersion.HTTP_1_1.toString()
     );
     public static final Set<String> UNIQUE_HEADERS = Set.of(
-            HttpHeader.HOST.value(),
-            HttpHeader.CONTENT_LENGTH.value(),
-            HttpHeader.TRANSFER_ENCODING.value()
+            HttpHeader.HOST,
+            HttpHeader.CONTENT_LENGTH,
+            HttpHeader.TRANSFER_ENCODING
     );
     public static final Set<String> MANDATORY_HEADERS = Set.of(
-            HttpHeader.HOST.value()
+            HttpHeader.HOST
     );
 }

@@ -1,6 +1,5 @@
 package com.jvmux.core.http.model;
 
-import com.jvmux.core.http.constant.HttpHeader;
 import com.jvmux.core.http.constant.HttpMethod;
 import com.jvmux.core.http.constant.HttpVersion;
 import com.jvmux.core.http.parser.RequestParser;
@@ -17,8 +16,8 @@ public record HttpRequest(
         Map<String, String> headers,
         InputStream body
 ) {
-    public String getHeader(HttpHeader name) {
-        return this.headers.get(name.value());
+    public String getHeader(String name) {
+        return this.headers.get(name);
     }
 
     public static HttpRequest from(String[] raw, InputStream body) {
