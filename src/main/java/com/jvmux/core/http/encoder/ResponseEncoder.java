@@ -18,7 +18,10 @@ public class ResponseEncoder {
 
         if (response.headers() != null) {
             for (var header : response.headers().entrySet()) {
-               str.append(encodeHeader(header.getKey(), header.getValue()));
+                str.append(encodeHeader(
+                        header.getKey().value(),
+                        header.getValue()
+                ));
             }
             str.append(CRLF);
         }

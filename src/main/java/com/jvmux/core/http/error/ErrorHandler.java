@@ -16,24 +16,7 @@ public final class ErrorHandler {
     private ErrorHandler() {}
 
     public static HttpResponse toResponse(Throwable error) {
-        return toResponse(error, HttpVersion.HTTP_1_1);
-    }
-
-    public static HttpResponse toResponse(Throwable error, HttpVersion version) {
-        var status = statusOf(error);
-        var body = bodyOf(error);
-        var contentLength = body.getBytes(StandardCharsets.US_ASCII).length;
-
-        return HttpResponse.builder()
-                .version(version)
-                .status(status)
-                .headers(Map.of(
-                        HttpHeader.CONTENT_LENGTH.value(), Integer.toString(contentLength),
-                        HttpHeader.CONTENT_TYPE.value(), CONTENT_TYPE,
-                        HttpHeader.CONNECTION.value(), "close"
-                ))
-                .body(body)
-                .build();
+        return HttpResponse.text(statusOf(error), bodyOf(error));
     }
 
     private static int statusOf(Throwable error) {
