@@ -1,12 +1,11 @@
 package com.jvmux;
 
-import com.jvmux.core.http.constant.HttpMethod;
-import com.jvmux.core.http.HttpServer;
-import com.jvmux.core.routing.Router;
-import com.jvmux.core.routing.Handler;
-import com.jvmux.core.tcp.TCPServer;
+import com.jvmux.network.http.constant.HttpMethod;
+import com.jvmux.network.http.HttpServer;
+import com.jvmux.network.routing.Router;
+import com.jvmux.network.routing.Handler;
+import com.jvmux.network.tcp.TCPServer;
 
-import java.io.IOException;
 import java.util.Set;
 
 public class Main {

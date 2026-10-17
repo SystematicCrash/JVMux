@@ -1,8 +1,8 @@
-package com.jvmux.core.http.model;
+package com.jvmux.network.http.model;
 
-import com.jvmux.core.http.constant.HttpMethod;
-import com.jvmux.core.http.constant.HttpVersion;
-import com.jvmux.core.http.parser.RequestParser;
+import com.jvmux.network.http.constant.HttpMethod;
+import com.jvmux.network.http.constant.HttpVersion;
+import com.jvmux.network.http.io.RequestParser;
 import lombok.Builder;
 
 import java.io.InputStream;

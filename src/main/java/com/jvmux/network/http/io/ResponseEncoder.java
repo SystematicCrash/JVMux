@@ -1,13 +1,13 @@
-package com.jvmux.core.http.encoder;
+package com.jvmux.network.http.io;
 
-import com.jvmux.core.http.constant.HttpVersion;
-import com.jvmux.core.http.model.HttpResponse;
-import com.jvmux.core.http.model.HttpStatus;
+import com.jvmux.network.http.constant.HttpVersion;
+import com.jvmux.network.http.model.HttpResponse;
+import com.jvmux.network.http.constant.HttpStatus;
 
 import java.nio.charset.StandardCharsets;
 
-import static com.jvmux.core.http.constant.Constants.CRLF;
-import static com.jvmux.core.http.constant.Constants.SP;
+import static com.jvmux.network.http.constant.Constants.CRLF;
+import static com.jvmux.network.http.constant.Constants.SP;
 
 public class ResponseEncoder {
 

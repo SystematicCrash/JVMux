@@ -1,6 +1,6 @@
-package com.jvmux.core.routing;
+package com.jvmux.network.routing;
 
-import com.jvmux.core.http.constant.HttpMethod;
+import com.jvmux.network.http.constant.HttpMethod;
 import lombok.Builder;
 import java.util.Map;
 import java.util.Set;

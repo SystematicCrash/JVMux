@@ -1,4 +1,4 @@
-package com.jvmux.core.http.constant;
+package com.jvmux.network.http.constant;
 
 public final class HttpHeader {
 

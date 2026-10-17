@@ -1,4 +1,4 @@
-package com.jvmux.core.routing;
+package com.jvmux.network.routing;
 
 public enum LookupKind {
     FOUND,

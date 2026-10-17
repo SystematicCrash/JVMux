@@ -1,12 +1,12 @@
-package com.jvmux.core.http.stream;
+package com.jvmux.network.http.io;
 
-import com.jvmux.core.http.constant.HttpHeader;
-import com.jvmux.core.http.model.HttpResponse;
+import com.jvmux.network.http.constant.HttpHeader;
+import com.jvmux.network.http.model.HttpResponse;
 
 import java.io.*;
 import java.util.Objects;
 
-import static com.jvmux.core.http.constant.Constants.READ_BUFFER_SIZE;
+import static com.jvmux.network.http.constant.Constants.READ_BUFFER_SIZE;
 
 public class ResponseWriter {
 
