@@ -8,6 +8,7 @@ import lombok.Builder;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Map;
 
 @Builder
@@ -17,6 +18,12 @@ public record HttpResponse(
         Map<String, String> headers,
         InputStream body
 ) {
+
+    public HttpResponse {
+        if (headers == null) {
+            headers = new HashMap<>();
+        }
+    }
 
     public static HttpResponse empty(int status) {
         var res = HttpResponse.builder()

@@ -1,17 +1,11 @@
 package com.jvmux.core.http.error;
 
-import com.jvmux.core.http.constant.HttpHeader;
-import com.jvmux.core.http.constant.HttpVersion;
 import com.jvmux.core.http.model.HttpResponse;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
 
 public final class ErrorHandler {
 
     private static final int DEFAULT_STATUS = 500;
     private static final String DEFAULT_MESSAGE = "Internal Server Error";
-    private static final String CONTENT_TYPE = "text/plain";
 
     private ErrorHandler() {}
 

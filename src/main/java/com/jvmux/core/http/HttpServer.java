@@ -20,12 +20,8 @@ public class HttpServer {
 
     public boolean handle(InputStream in, OutputStream out) {
         try {
-            var req = this.readRequest(in);
-            if (req == null) {
-                return false;
-            }
-
-            var response = this.dispatch(req);
+            var request = this.readRequest(in);
+            var response = this.dispatch(request);
             return writeResponse(response, out);
         } catch (HttpException | IOException e) {
             return this.writeResponse(ErrorHandler.toResponse(e), out);
@@ -35,7 +31,7 @@ public class HttpServer {
     private HttpResponse dispatch(HttpRequest request) {
         try {
             var handler = this.routeTree.lookup(
-                    request.requestLine().method(), request.requestLine().path()
+                    request.method(), request.path()
             );
 
             return HttpResponse.text(400, "fuck you");
@@ -75,7 +71,7 @@ public class HttpServer {
 
         var raw = buffer
                 .toString(StandardCharsets.US_ASCII)
-                .split("\n");
+                .split(CRLF);
 
         return HttpRequest.from(raw, in);
     }

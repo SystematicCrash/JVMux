@@ -4,7 +4,6 @@ import com.jvmux.core.http.constant.HttpMethod;
 import com.jvmux.core.http.constant.HttpVersion;
 import com.jvmux.core.http.error.HttpException;
 import com.jvmux.core.http.model.HttpRequest;
-import com.jvmux.core.http.model.RequestLine;
 import com.jvmux.util.Pair;
 
 import java.util.Arrays;
@@ -23,9 +22,11 @@ public class RequestParser {
         if (raw.length == 0) {
             throw HttpException.badRequest("Bad Request");
         }
-
+        var parts = parseRequestLine(raw[0]);
         return HttpRequest.builder()
-                .requestLine(parseRequestLine(raw[0]))
+                .method(HttpMethod.from(parts[0]))
+                .path(parts[1])
+                .version(HttpVersion.from(parts[2]))
                 .headers(parseHeaders(
                         Arrays.copyOfRange(raw, 1, raw.length)
                 ))
@@ -81,7 +82,7 @@ public class RequestParser {
         return new Pair<>(name.trim(), value.trim());
     }
 
-    private static RequestLine parseRequestLine(String line) {
+    private static String[] parseRequestLine(String line) {
         if (line.length() > MAX_REQUEST_LINE_LEN) {
             throw HttpException.badRequest("Bad headers");
         }
@@ -99,7 +100,6 @@ public class RequestParser {
         }
 
         var method = parts[0];
-        var target = parts[1];
         var version = parts[2];
 
         if (!VALID_METHODS.contains(method)) {
@@ -109,10 +109,6 @@ public class RequestParser {
             throw HttpException.badRequest("Bad headers");
         }
 
-        return RequestLine.builder()
-                .path(target)
-                .method(HttpMethod.from(method))
-                .version(HttpVersion.from(version))
-                .build();
+        return parts;
     }
 }
