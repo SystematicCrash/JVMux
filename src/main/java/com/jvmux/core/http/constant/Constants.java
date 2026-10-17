@@ -19,6 +19,7 @@ public final class Constants {
     public static final int MAX_HEADER_COUNT = 100;
     public static final int MAX_HEADER_SIZE = 8 * 1024;
     public static final int MAX_REQUEST_LINE_LEN = 8 * 1024;
+    public static final int READ_BUFFER_SIZE = 8 * 1024;
 
     // validation
     public static final Set<String> VALID_METHODS = Set.of(
