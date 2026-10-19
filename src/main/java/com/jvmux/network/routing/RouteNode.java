@@ -2,13 +2,14 @@ package com.jvmux.network.routing;
 
 import com.jvmux.network.http.constant.HttpMethod;
 
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.Map;
 
 public class RouteNode {
     private final Map<String, RouteNode> children = new HashMap<>();
-    public final Map<HttpMethod, Handler> handlers = new HashMap<>();
+    public final EnumMap<HttpMethod, Handler> handlers = new EnumMap<>(HttpMethod.class);
 
     public LookupResult lookup(HttpMethod method, String[] segments, int idx, Map<String, String> params) {
         if (idx == segments.length) {

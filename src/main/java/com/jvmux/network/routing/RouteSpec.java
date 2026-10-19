@@ -3,11 +3,11 @@ package com.jvmux.network.routing;
 import com.jvmux.network.http.constant.HttpMethod;
 import lombok.Builder;
 
-import java.util.Set;
+import java.util.EnumSet;
 
 @Builder
 public record RouteSpec(
         String path,
-        Set<HttpMethod> methods,
+        EnumSet<HttpMethod> methods,
         Handler handler
 ) {}
