@@ -11,8 +11,17 @@ public class HttpException extends RuntimeException {
         this.status = status;
     }
 
+    public HttpException(int status, String message, Throwable cause) {
+        super(message, cause);
+        this.status = status;
+    }
+
     public static HttpException internalError() {
         return new HttpException(500, "Internal Server Error");
+    }
+
+    public static HttpException internalError(Throwable cause) {
+        return new HttpException(500, "Internal Server Error", cause);
     }
 
     public static HttpException badRequest(String message) {
