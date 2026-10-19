@@ -13,22 +13,22 @@ import static com.jvmux.network.http.constant.Constants.SP;
 public class ResponseEncoder {
 
     public static byte[] encode(HttpResponse response) {
-        var str = new StringBuilder();
+        var sb = new StringBuilder();
 
-        str.append(encodeResponseLine(response.version(), response.status()));
+        sb.append(encodeResponseLine(response.version(), response.status()));
 
         if (response.headers() != null) {
             for (var header : response.headers().entrySet()) {
-                str.append(header.getKey())
+                sb.append(header.getKey())
                         .append(COLON)
                         .append(SP)
                         .append(header.getValue())
                         .append(CRLF);
             }
-            str.append(CRLF);
+            sb.append(CRLF);
         }
 
-        return str.toString().getBytes(StandardCharsets.US_ASCII);
+        return sb.toString().getBytes(StandardCharsets.US_ASCII);
     }
 
     private static String encodeResponseLine(HttpVersion version, int status) {
