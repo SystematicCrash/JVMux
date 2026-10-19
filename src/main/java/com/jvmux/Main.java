@@ -1,28 +1,27 @@
 package com.jvmux;
 
-import com.jvmux.core.http.constant.HttpMethod;
-import com.jvmux.core.http.HttpServer;
-import com.jvmux.core.routing.Router;
-import com.jvmux.core.routing.Handler;
-import com.jvmux.core.tcp.ConnectionHandler;
-import com.jvmux.core.tcp.TCPServer;
-
-import java.util.Set;
+import com.jvmux.network.http.HttpServer;
+import com.jvmux.network.routing.Router;
+import com.jvmux.network.routing.Handler;
+import com.jvmux.network.tcp.TCPServer;
+import static com.jvmux.network.http.constant.HttpMethod.*;
 
 public class Main {
     public static void main(String[] args) throws Exception {
        System.out.println("Application is up and running..."); 
-       var router = new Router();
 
-        router.add(Set.of(HttpMethod.GET), "/users/profile", new Handler());
-        router.add(Set.of(HttpMethod.POST), "/users/profile", new Handler());
-        router.add(Set.of(HttpMethod.DELETE), "/users/profile", new Handler());
-
-        var routeTree = router.build();
+        var routeTree = registerRoutes().build();
         var httpServer = new HttpServer(routeTree);
-        var connHandler = new ConnectionHandler(httpServer);
-        var tcpServer = new TCPServer(1234, connHandler);
+        var tcpServer = new TCPServer(1234, httpServer::handle);
 
         tcpServer.start();
+    }
+
+    private static Router registerRoutes() {
+        var router = new Router();
+
+        router.add("/users/profile", new Handler(), GET, DELETE, POST);
+
+        return router;
     }
 }

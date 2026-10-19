@@ -1,6 +1,10 @@
 .gradle/
 .idea/
 build/
+out/
+.vscode
+.gemini
+.claude
 
 repomix-output.xml
 .codegraph
