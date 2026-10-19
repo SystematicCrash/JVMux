@@ -5,6 +5,7 @@ import com.jvmux.network.http.body.HtmlEncoder;
 import com.jvmux.network.http.body.JsonEncoder;
 import com.jvmux.network.http.body.PlainTextEncoder;
 import com.jvmux.network.http.io.BodyWriter;
+import com.jvmux.network.http.io.ChunkedBodyWriter;
 import com.jvmux.network.http.io.FixedBodyWriter;
 import com.jvmux.network.http.constant.HttpHeader;
 import com.jvmux.network.http.constant.HttpVersion;
@@ -40,6 +41,24 @@ public record HttpResponse(
         return res.applyDefaultFraming();
     }
 
+    public String getHeader(String name) {
+        return this.headers.get(name);
+    }
+
+    public void setHeader(String header, String value) {
+        this.headers.put(header, value);
+    }
+
+    public BodyWriter getWriter() {
+        if (isChunked()) {
+            return new ChunkedBodyWriter(this.body);
+        }
+        if (isFixedSize()) {
+            return new FixedBodyWriter(this.body, getContentLength());
+        }
+        return null;
+    }
+
     public static HttpResponse text(int status, String text) {
         return from(status, text, new PlainTextEncoder());
     }
@@ -63,18 +82,6 @@ public record HttpResponse(
         res.setHeader(HttpHeader.CONTENT_LENGTH, String.valueOf(bytes.length));
         res.setHeader(HttpHeader.CONTENT_TYPE, encoder.contentType());
         return res.applyDefaultFraming();
-    }
-
-    public String getHeader(String name) {
-        return this.headers.get(name);
-    }
-
-    public void setHeader(String header, String value) {
-        this.headers.put(header, value);
-    }
-
-    public BodyWriter getWriter() {
-        return new FixedBodyWriter(this.body, getContentLength());
     }
 
     private HttpResponse applyDefaultFraming() {

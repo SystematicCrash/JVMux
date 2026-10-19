@@ -11,6 +11,7 @@ public final class Constants {
     public static final char LF = '\n';
     public static final char SP = ' ';
     public static final char COLON = ':';
+    public static final char SEMI_COLON = ';';
 
     // Strings for header parsing, building responses, and splitting
     public static final String CRLF = "\r\n";
