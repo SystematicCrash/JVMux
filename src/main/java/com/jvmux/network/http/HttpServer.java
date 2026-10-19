@@ -1,5 +1,6 @@
 package com.jvmux.network.http;
 
+import com.jvmux.network.http.codec.RequestParser;
 import com.jvmux.network.http.codec.ResponseEncoder;
 import com.jvmux.network.http.exception.ErrorHandler;
 import com.jvmux.network.http.exception.HttpException;
@@ -73,7 +74,7 @@ public class HttpServer {
                 .toString(StandardCharsets.US_ASCII)
                 .split(CRLF);
 
-        return HttpRequest.from(raw, in);
+        return RequestParser.parse(raw, in);
     }
 
     private boolean writeResponse(HttpResponse response, OutputStream out) {
