@@ -6,8 +6,7 @@ import com.jvmux.network.http.constant.HttpStatus;
 
 import java.nio.charset.StandardCharsets;
 
-import static com.jvmux.network.http.constant.Constants.CRLF;
-import static com.jvmux.network.http.constant.Constants.SP;
+import static com.jvmux.network.http.constant.Constants.*;
 
 public class ResponseEncoder {
 
@@ -18,19 +17,16 @@ public class ResponseEncoder {
 
         if (response.headers() != null) {
             for (var header : response.headers().entrySet()) {
-                str.append(encodeHeader(
-                        header.getKey(),
-                        header.getValue()
-                ));
+                str.append(header.getKey())
+                        .append(COLON)
+                        .append(SP)
+                        .append(header.getValue())
+                        .append(CRLF);
             }
             str.append(CRLF);
         }
 
         return str.toString().getBytes(StandardCharsets.US_ASCII);
-    }
-
-    private static String encodeHeader(String key, String value) {
-        return key + ": " + value + CRLF;
     }
 
     private static String encodeResponseLine(HttpVersion version, int status) {
