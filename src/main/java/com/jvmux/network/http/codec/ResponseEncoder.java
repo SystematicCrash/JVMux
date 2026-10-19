@@ -7,7 +7,6 @@ import com.jvmux.network.http.constant.HttpStatus;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import static com.jvmux.network.http.constant.Constants.COLON;
@@ -16,8 +15,6 @@ import static com.jvmux.network.http.constant.Constants.READ_BUFFER_SIZE;
 import static com.jvmux.network.http.constant.Constants.SP;
 
 public class ResponseEncoder {
-
-    private static final Charset ASCII = StandardCharsets.US_ASCII;
 
     public static byte[] encode(HttpResponse response) {
         var str = new StringBuilder();
@@ -35,7 +32,7 @@ public class ResponseEncoder {
             str.append(CRLF);
         }
 
-        return str.toString().getBytes(ASCII);
+        return str.toString().getBytes(StandardCharsets.US_ASCII);
     }
 
     public static void encodeChunked(InputStream body, OutputStream out) throws IOException {
@@ -56,7 +53,7 @@ public class ResponseEncoder {
     }
 
     private static void writeString(OutputStream out, String s) throws IOException {
-        out.write(s.getBytes(ASCII));
+        out.write(s.getBytes(StandardCharsets.US_ASCII));
     }
 
     private static String encodeResponseLine(HttpVersion version, int status) {
