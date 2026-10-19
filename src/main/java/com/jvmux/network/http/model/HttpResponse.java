@@ -4,8 +4,8 @@ import com.jvmux.network.http.body.BodyEncoder;
 import com.jvmux.network.http.body.HtmlEncoder;
 import com.jvmux.network.http.body.JsonEncoder;
 import com.jvmux.network.http.body.PlainTextEncoder;
-import com.jvmux.network.http.codec.BodyWriter;
-import com.jvmux.network.http.codec.FixedLengthBodyWriter;
+import com.jvmux.network.http.io.BodyWriter;
+import com.jvmux.network.http.io.FixedBodyWriter;
 import com.jvmux.network.http.constant.HttpHeader;
 import com.jvmux.network.http.constant.HttpVersion;
 import lombok.Builder;
@@ -74,7 +74,7 @@ public record HttpResponse(
     }
 
     public BodyWriter getWriter() {
-        return new FixedLengthBodyWriter(this.body, getContentLength());
+        return new FixedBodyWriter(this.body, getContentLength());
     }
 
     private HttpResponse applyDefaultFraming() {

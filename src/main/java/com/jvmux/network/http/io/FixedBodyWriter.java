@@ -1,4 +1,4 @@
-package com.jvmux.network.http.codec;
+package com.jvmux.network.http.io;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -6,10 +6,10 @@ import java.io.OutputStream;
 
 import static com.jvmux.network.http.constant.Constants.READ_BUFFER_SIZE;
 
-public class FixedLengthBodyWriter extends BodyWriter {
+public class FixedBodyWriter extends BodyWriter {
     private final long length;
 
-    public FixedLengthBodyWriter(InputStream inputStream, long length) {
+    public FixedBodyWriter(InputStream inputStream, long length) {
         super(inputStream);
         this.length = length;
     }
