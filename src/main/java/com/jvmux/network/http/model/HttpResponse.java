@@ -5,8 +5,7 @@ import com.jvmux.network.http.body.HtmlEncoder;
 import com.jvmux.network.http.body.JsonEncoder;
 import com.jvmux.network.http.body.PlainTextEncoder;
 import com.jvmux.network.http.io.BodyWriter;
-import com.jvmux.network.http.io.ChunkedBodyWriter;
-import com.jvmux.network.http.io.FixedBodyWriter;
+import com.jvmux.network.http.io.BodyWriterFactory;
 import com.jvmux.network.http.constant.HttpHeader;
 import com.jvmux.network.http.constant.HttpVersion;
 import lombok.Builder;
@@ -15,7 +14,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 @Builder
 public record HttpResponse(
@@ -50,13 +48,7 @@ public record HttpResponse(
     }
 
     public BodyWriter getWriter() {
-        if (isChunked()) {
-            return new ChunkedBodyWriter(this.body);
-        }
-        if (isFixedSize()) {
-            return new FixedBodyWriter(this.body, getContentLength());
-        }
-        return null;
+        return BodyWriterFactory.create(this.body, this.headers);
     }
 
     public static HttpResponse text(int status, String text) {
@@ -87,18 +79,5 @@ public record HttpResponse(
     private HttpResponse applyDefaultFraming() {
         this.setHeader(HttpHeader.HOST, "JVMux");
         return this;
-    }
-
-    private boolean isChunked() {
-        return Objects.equals(this.getHeader(HttpHeader.TRANSFER_ENCODING), "chunked");
-    }
-
-    private boolean isFixedSize() {
-        return this.getHeader(HttpHeader.CONTENT_LENGTH) != null;
-    }
-
-    private long getContentLength() {
-        var contentLen = getHeader(HttpHeader.CONTENT_LENGTH);
-        return Long.parseLong(contentLen);
     }
 }
