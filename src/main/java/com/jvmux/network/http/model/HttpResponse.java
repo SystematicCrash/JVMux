@@ -4,6 +4,8 @@ import com.jvmux.network.http.body.BodyEncoder;
 import com.jvmux.network.http.body.HtmlEncoder;
 import com.jvmux.network.http.body.JsonEncoder;
 import com.jvmux.network.http.body.PlainTextEncoder;
+import com.jvmux.network.http.codec.BodyWriter;
+import com.jvmux.network.http.codec.FixedLengthBodyWriter;
 import com.jvmux.network.http.constant.HttpHeader;
 import com.jvmux.network.http.constant.HttpVersion;
 import lombok.Builder;
@@ -12,6 +14,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @Builder
 public record HttpResponse(
@@ -70,8 +73,25 @@ public record HttpResponse(
         this.headers.put(header, value);
     }
 
+    public BodyWriter getWriter() {
+        return new FixedLengthBodyWriter(this.body, getContentLength());
+    }
+
     private HttpResponse applyDefaultFraming() {
         this.setHeader(HttpHeader.HOST, "JVMux");
         return this;
+    }
+
+    private boolean isChunked() {
+        return Objects.equals(this.getHeader(HttpHeader.TRANSFER_ENCODING), "chunked");
+    }
+
+    private boolean isFixedSize() {
+        return this.getHeader(HttpHeader.CONTENT_LENGTH) != null;
+    }
+
+    private long getContentLength() {
+        var contentLen = getHeader(HttpHeader.CONTENT_LENGTH);
+        return Long.parseLong(contentLen);
     }
 }

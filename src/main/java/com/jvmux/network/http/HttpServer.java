@@ -1,10 +1,10 @@
 package com.jvmux.network.http;
 
+import com.jvmux.network.http.codec.ResponseEncoder;
 import com.jvmux.network.http.exception.ErrorHandler;
 import com.jvmux.network.http.exception.HttpException;
 import com.jvmux.network.http.model.HttpRequest;
 import com.jvmux.network.http.model.HttpResponse;
-import com.jvmux.network.http.codec.ResponseWriter;
 import com.jvmux.network.routing.RouteTree;
 import lombok.AllArgsConstructor;
 
@@ -78,7 +78,8 @@ public class HttpServer {
 
     private boolean writeResponse(HttpResponse response, OutputStream out) {
         try {
-            ResponseWriter.write(response, out);
+            out.write(ResponseEncoder.encode(response));
+            response.getWriter().write(out);
             return true;
         } catch (IOException e) {
             return false;
