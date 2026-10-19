@@ -1,4 +1,4 @@
-package com.jvmux.network.http.exception;
+package com.jvmux.net.http.exception;
 
 import lombok.Getter;
 

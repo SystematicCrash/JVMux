@@ -1,4 +1,4 @@
-package com.jvmux.network.http.constant;
+package com.jvmux.net.http.constant;
 
 public final class HttpStatus {
 

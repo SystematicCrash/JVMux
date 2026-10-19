@@ -1,17 +1,17 @@
-package com.jvmux.network.http;
+package com.jvmux.net.http;
 
-import com.jvmux.network.http.exception.ErrorHandler;
-import com.jvmux.network.http.exception.HttpException;
-import com.jvmux.network.http.model.HttpRequest;
-import com.jvmux.network.http.model.HttpResponse;
-import com.jvmux.network.http.io.ResponseWriter;
-import com.jvmux.network.routing.RouteTree;
+import com.jvmux.net.http.exception.ErrorHandler;
+import com.jvmux.net.http.exception.HttpException;
+import com.jvmux.net.http.model.HttpRequest;
+import com.jvmux.net.http.model.HttpResponse;
+import com.jvmux.net.http.io.ResponseWriter;
+import com.jvmux.net.routing.RouteTree;
 import lombok.AllArgsConstructor;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 
-import static com.jvmux.network.http.constant.Constants.*;
+import static com.jvmux.net.http.constant.Constants.*;
 
 @AllArgsConstructor
 public class HttpServer {

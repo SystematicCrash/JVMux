@@ -1,10 +1,10 @@
 package com.jvmux;
 
-import com.jvmux.network.http.constant.HttpMethod;
-import com.jvmux.network.http.HttpServer;
-import com.jvmux.network.routing.Router;
-import com.jvmux.network.routing.Handler;
-import com.jvmux.network.tcp.TCPServer;
+import com.jvmux.net.http.constant.HttpMethod;
+import com.jvmux.net.http.HttpServer;
+import com.jvmux.net.routing.Router;
+import com.jvmux.net.routing.Handler;
+import com.jvmux.net.tcp.TCPServer;
 
 import java.util.Set;
 

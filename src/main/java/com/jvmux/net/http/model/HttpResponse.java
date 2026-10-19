@@ -1,8 +1,8 @@
-package com.jvmux.network.http.model;
+package com.jvmux.net.http.model;
 
-import com.jvmux.network.http.constant.HttpHeader;
-import com.jvmux.network.http.constant.HttpVersion;
-import com.jvmux.network.http.io.ResponseEncoder;
+import com.jvmux.net.http.constant.HttpHeader;
+import com.jvmux.net.http.constant.HttpVersion;
+import com.jvmux.net.http.io.ResponseEncoder;
 import lombok.Builder;
 
 import java.io.ByteArrayInputStream;

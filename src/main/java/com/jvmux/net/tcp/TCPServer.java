@@ -1,4 +1,4 @@
-package com.jvmux.network.tcp;
+package com.jvmux.net.tcp;
 
 import lombok.AllArgsConstructor;
 import java.io.IOException;

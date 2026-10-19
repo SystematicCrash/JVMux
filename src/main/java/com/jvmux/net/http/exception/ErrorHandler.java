@@ -1,6 +1,6 @@
-package com.jvmux.network.http.exception;
+package com.jvmux.net.http.exception;
 
-import com.jvmux.network.http.model.HttpResponse;
+import com.jvmux.net.http.model.HttpResponse;
 
 public final class ErrorHandler {
 

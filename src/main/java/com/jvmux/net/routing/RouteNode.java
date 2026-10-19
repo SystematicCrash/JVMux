@@ -1,6 +1,6 @@
-package com.jvmux.network.routing;
+package com.jvmux.net.routing;
 
-import com.jvmux.network.http.constant.HttpMethod;
+import com.jvmux.net.http.constant.HttpMethod;
 
 import java.util.HashMap;
 import java.util.Optional;

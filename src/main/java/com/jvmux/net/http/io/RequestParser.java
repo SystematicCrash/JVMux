@@ -1,16 +1,16 @@
-package com.jvmux.network.http.io;
+package com.jvmux.net.http.io;
 
-import com.jvmux.network.http.constant.HttpMethod;
-import com.jvmux.network.http.constant.HttpVersion;
-import com.jvmux.network.http.exception.HttpException;
-import com.jvmux.network.http.model.HttpRequest;
+import com.jvmux.net.http.constant.HttpMethod;
+import com.jvmux.net.http.constant.HttpVersion;
+import com.jvmux.net.http.exception.HttpException;
+import com.jvmux.net.http.model.HttpRequest;
 import com.jvmux.util.Pair;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.jvmux.network.http.constant.Constants.*;
+import static com.jvmux.net.http.constant.Constants.*;
 
 public class RequestParser {
 

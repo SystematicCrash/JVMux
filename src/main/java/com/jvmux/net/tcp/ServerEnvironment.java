@@ -1,4 +1,4 @@
-package com.jvmux.network.tcp;
+package com.jvmux.net.tcp;
 
 import java.io.IOException;
 import java.net.ServerSocket;
