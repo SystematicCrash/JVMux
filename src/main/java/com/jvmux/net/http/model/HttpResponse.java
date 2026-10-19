@@ -1,5 +1,9 @@
 package com.jvmux.net.http.model;
 
+import com.jvmux.net.http.body.BodyEncoder;
+import com.jvmux.net.http.body.HtmlEncoder;
+import com.jvmux.net.http.body.JsonEncoder;
+import com.jvmux.net.http.body.PlainTextEncoder;
 import com.jvmux.net.http.constant.HttpHeader;
 import com.jvmux.net.http.constant.HttpVersion;
 import com.jvmux.net.http.io.ResponseEncoder;
@@ -7,7 +11,6 @@ import lombok.Builder;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,7 +29,7 @@ public record HttpResponse(
     }
 
     public static HttpResponse empty(int status) {
-        var res = HttpResponse.builder()
+        var res = builder()
                 .version(HttpVersion.HTTP_1_1)
                 .status(status)
                 .build();
@@ -36,14 +39,27 @@ public record HttpResponse(
     }
 
     public static HttpResponse text(int status, String text) {
-        var res = HttpResponse.builder()
+        return from(status, text, new PlainTextEncoder());
+    }
+
+    public static HttpResponse html(int status, String html) {
+        return from(status, html, new HtmlEncoder());
+    }
+
+    public static HttpResponse json(int status, Object content) {
+        return from(status, content, new JsonEncoder());
+    }
+
+    private static HttpResponse from(int status, Object content, BodyEncoder encoder) {
+        byte[] bytes = encoder.encode(content);
+        var res = builder()
                 .version(HttpVersion.HTTP_1_1)
                 .status(status)
-                .body(new ByteArrayInputStream(text.getBytes(StandardCharsets.US_ASCII)))
+                .body(new ByteArrayInputStream(bytes))
                 .build();
 
-        res.setHeader(HttpHeader.CONTENT_LENGTH, String.valueOf(text.length()));
-        res.setHeader(HttpHeader.CONTENT_TYPE, "text/plain");
+        res.setHeader(HttpHeader.CONTENT_LENGTH, String.valueOf(bytes.length));
+        res.setHeader(HttpHeader.CONTENT_TYPE, encoder.contentType());
         return res.applyDefaultFraming();
     }
 
@@ -53,10 +69,6 @@ public record HttpResponse(
 
     public void setHeader(String header, String value) {
         this.headers.put(header, value);
-    }
-
-    public byte[] encode() {
-        return ResponseEncoder.encode(this);
     }
 
     private HttpResponse applyDefaultFraming() {

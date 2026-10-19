@@ -11,10 +11,15 @@ import java.util.Set;
 public class Router {
     private final List<RouteSpec> routes = new ArrayList<>();
 
-    public void add(Set<HttpMethod> methods, String path, Handler handler) {
+    public void add(String path, Handler handler, HttpMethod... methods) {
+        Set<HttpMethod> methodSet;
+        
+        if (methods.length == 0) methodSet = Set.of(HttpMethod.ANY);
+        else methodSet = Set.of(methods);
+        
         this.routes.add(
                 RouteSpec.builder()
-                        .methods(methods)
+                        .methods(methodSet)
                         .path(path)
                         .handler(handler)
                         .build()

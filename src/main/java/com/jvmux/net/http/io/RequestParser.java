@@ -4,7 +4,7 @@ import com.jvmux.net.http.constant.HttpMethod;
 import com.jvmux.net.http.constant.HttpVersion;
 import com.jvmux.net.http.exception.HttpException;
 import com.jvmux.net.http.model.HttpRequest;
-import com.jvmux.util.Pair;
+import com.jvmux.common.Pair;
 
 import java.util.Arrays;
 import java.util.HashMap;
