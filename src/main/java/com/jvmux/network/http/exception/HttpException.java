@@ -32,8 +32,8 @@ public class HttpException extends RuntimeException {
         return new HttpException(431, "Request Header Fields Too Large");
     }
 
-    public static HttpException badGateway(String details) {
-        return new HttpException(502, "Bad Gateway: " + details);
+    public static HttpException badGateway() {
+        return new HttpException(502, "Bad Gateway Error");
     }
 
     @Override

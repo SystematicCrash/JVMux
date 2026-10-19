@@ -4,6 +4,10 @@ public final class HttpStatus {
 
     private HttpStatus() {}
 
+    public static boolean isValid(int status) {
+        return status <= 599 && status >= 100;
+    }
+
     public static String reasonPhrase(int statusCode) {
         return switch (statusCode) {
             // 1xx Informational

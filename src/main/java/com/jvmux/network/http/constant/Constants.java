@@ -31,8 +31,14 @@ public final class Constants {
             HttpMethod.POST.value(),
             HttpMethod.PATCH.value()
     );
-    public static final Set<String> VALID_VERSIONS = Set.of(
+    public static final Set<String> SUPPORTED_VERSIONS = Set.of(
             HttpVersion.HTTP_1_1.value()
+    );
+    public static final Set<String> VALID_VERSIONS = Set.of(
+            HttpVersion.HTTP_1_0.value(),
+            HttpVersion.HTTP_1_1.value(),
+            HttpVersion.HTTP_2.value(),
+            HttpVersion.HTTP_3.value()
     );
     public static final Set<String> UNIQUE_HEADERS = Set.of(
             HttpHeader.HOST,
