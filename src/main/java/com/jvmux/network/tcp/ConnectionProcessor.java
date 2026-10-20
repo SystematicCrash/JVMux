@@ -5,6 +5,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 @FunctionalInterface
-public interface ConnectionHandler {
-    boolean handle(InputStream in, OutputStream out) throws IOException;
+public interface ConnectionProcessor<T> {
+    T process(InputStream in, OutputStream out) throws IOException;
 }

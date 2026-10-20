@@ -13,9 +13,9 @@ public class TCPServer implements AutoCloseable {
     private final int port;
     private ServerEnvironment environment;
     private volatile boolean running = false;
-    private final ConnectionHandler connHandler;
+    private final ConnectionProcessor<Boolean> connHandler;
 
-    public TCPServer(int port, ConnectionHandler handler) {
+    public TCPServer(int port, ConnectionProcessor<Boolean> handler) {
         this.port = port;
         this.connHandler = handler;
     }
@@ -42,7 +42,7 @@ public class TCPServer implements AutoCloseable {
             var out = socket.getOutputStream();
 
             while (!socket.isClosed() && this.running) {
-                boolean keepAlive = this.connHandler.handle(in, out);
+                boolean keepAlive = this.connHandler.process(in, out);
                 if (!keepAlive) break;
             }
         } catch (SocketTimeoutException | EOFException ignored) {
