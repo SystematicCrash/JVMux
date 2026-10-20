@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 
-import static com.jvmux.network.tcp.Constants.IDLE_TIMEOUT;
+import static com.jvmux.network.tcp.Constants.SERVER_IDLE_TIMEOUT;
 import static com.jvmux.network.tcp.Constants.TCP_NO_DELAY;
 
 public class TCPServer implements AutoCloseable {
@@ -15,9 +15,9 @@ public class TCPServer implements AutoCloseable {
     private volatile boolean running = false;
     private final ConnectionHandler connHandler;
 
-    public TCPServer(int port, ConnectionHandler processor) {
+    public TCPServer(int port, ConnectionHandler handler) {
         this.port = port;
-        this.connHandler = processor;
+        this.connHandler = handler;
     }
 
     public void start() throws IOException {
@@ -36,7 +36,7 @@ public class TCPServer implements AutoCloseable {
     private void handle(Socket socket) {
         try (socket) {
             socket.setTcpNoDelay(TCP_NO_DELAY);
-            socket.setSoTimeout(IDLE_TIMEOUT);
+            socket.setSoTimeout(SERVER_IDLE_TIMEOUT);
 
             var in = socket.getInputStream();
             var out = socket.getOutputStream();
