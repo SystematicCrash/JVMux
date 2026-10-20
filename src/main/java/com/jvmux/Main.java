@@ -11,7 +11,7 @@ public class Main {
         var routeTree = new Router().build();
         var httpServer = new HttpServer(routeTree);
 
-        try (var tcpServer = new TCPServer(1234, httpServer::handle)){
+        try (var tcpServer = new TCPServer(1234)) {
             tcpServer.start();
         }
     }
