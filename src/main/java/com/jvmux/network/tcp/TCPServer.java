@@ -1,42 +1,61 @@
 package com.jvmux.network.tcp;
 
-import lombok.AllArgsConstructor;
+import java.io.EOFException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.Socket;
-import java.util.function.BiFunction;
+import java.net.SocketTimeoutException;
 
-@AllArgsConstructor
-public class TCPServer {
+import static com.jvmux.network.tcp.Constants.IDLE_TIMEOUT;
+import static com.jvmux.network.tcp.Constants.TCP_NO_DELAY;
+
+public class TCPServer implements AutoCloseable {
+
     private final int port;
-    private final BiFunction<InputStream, OutputStream, Boolean> handler;
+    private ServerEnvironment environment;
+    private volatile boolean running = false;
+    private final ConnectionHandler connHandler;
+
+    public TCPServer(int port, ConnectionHandler processor) {
+        this.port = port;
+        this.connHandler = processor;
+    }
 
     public void start() throws IOException {
+        this.running = true;
+
         try (var env = ServerEnvironment.open(this.port)) {
-            while (!env.serverSocket().isClosed()) {
-                var clientSocket = env.serverSocket().accept();
-                env.executor().submit(() -> this.handle(clientSocket));
+            this.environment = env;
+
+            while (running && !this.environment.serverSocket().isClosed()) {
+                Socket clientSocket = this.environment.serverSocket().accept();
+                this.environment.executor().submit(() -> this.handle(clientSocket));
             }
         }
     }
 
-    public void handle(Socket socket) {
+    private void handle(Socket socket) {
         try (socket) {
-            socket.setSoTimeout(3000);
-            socket.setTcpNoDelay(true);
+            socket.setTcpNoDelay(TCP_NO_DELAY);
+            socket.setSoTimeout(IDLE_TIMEOUT);
 
-            var keepAlive = true;
+            var in = socket.getInputStream();
+            var out = socket.getOutputStream();
 
-            while (!socket.isClosed() && keepAlive) {
-                keepAlive = this.handler.apply(
-                        socket.getInputStream(),
-                        socket.getOutputStream()
-                );
+            while (!socket.isClosed() && this.running) {
+                boolean keepAlive = this.connHandler.handle(in, out);
+                if (!keepAlive) break;
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } catch (SocketTimeoutException | EOFException ignored) {
+        } catch (Exception e) {
+            System.err.println("Client connection terminated: " + e.getMessage());
         }
     }
 
+    @Override
+    public void close() throws IOException {
+        this.running = false;
+        if (this.environment != null) {
+            this.environment.close();
+        }
+    }
 }
