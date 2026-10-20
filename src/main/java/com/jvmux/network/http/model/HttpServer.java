@@ -1,11 +1,9 @@
-package com.jvmux.network.http;
+package com.jvmux.network.http.model;
 
 import com.jvmux.network.http.codec.RequestParser;
 import com.jvmux.network.http.codec.ResponseEncoder;
 import com.jvmux.network.http.exception.ErrorHandler;
 import com.jvmux.network.http.exception.HttpException;
-import com.jvmux.network.http.model.HttpRequest;
-import com.jvmux.network.http.model.HttpResponse;
 import com.jvmux.network.routing.RouteTree;
 import lombok.AllArgsConstructor;
 

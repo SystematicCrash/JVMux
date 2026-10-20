@@ -1,6 +1,6 @@
 package com.jvmux;
 
-import com.jvmux.network.http.HttpServer;
+import com.jvmux.network.http.model.HttpServer;
 import com.jvmux.network.routing.Router;
 import com.jvmux.network.tcp.TCPServer;
 
