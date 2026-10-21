@@ -1,4 +1,6 @@
 package com.jvmux.network.routing;
 
-public record Handler() {
+public record Handler(
+        String host, int port
+) {
 }

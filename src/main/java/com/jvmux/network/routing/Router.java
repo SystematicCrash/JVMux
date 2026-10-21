@@ -36,6 +36,6 @@ public class Router {
     }
 
     private void registerDefaultRoutes() {
-        this.add("/users/profile", new Handler(), GET, DELETE, POST);
+        this.add("/files", new Handler("localhost", 1234), GET, DELETE, POST);
     }
 }
