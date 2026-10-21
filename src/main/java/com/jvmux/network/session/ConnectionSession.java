@@ -1,5 +1,6 @@
 package com.jvmux.network.session;
 
+import com.jvmux.network.http.exception.ErrorHandler;
 import com.jvmux.network.http.exception.HttpException;
 import com.jvmux.network.http.io.HttpClient;
 import com.jvmux.network.http.io.HttpServer;
@@ -40,10 +41,7 @@ public class ConnectionSession implements Runnable, AutoCloseable {
                     break;
                 }
 
-                if (!dispatch(request)) {
-                    continue;
-                }
-
+                dispatch(request);
                 writeRequest(request);
                 writeResponse(readResponse());
             } catch (IOException e) {
@@ -60,7 +58,7 @@ public class ConnectionSession implements Runnable, AutoCloseable {
         HttpServer.writeResponse(response, this.downstream.out());
     }
 
-    private HttpResponse readResponse() {
+    private HttpResponse readResponse() throws IOException {
         var response = HttpClient.readResponse(this.upstream.in());
         if (response == null) {
             throw HttpException.badGateway();
@@ -68,7 +66,7 @@ public class ConnectionSession implements Runnable, AutoCloseable {
         return response;
     }
 
-    private void writeRequest(HttpRequest request) {
+    private void writeRequest(HttpRequest request) throws IOException {
         HttpClient.writeRequest(request, this.upstream.out());
     }
 
@@ -81,22 +79,18 @@ public class ConnectionSession implements Runnable, AutoCloseable {
         );
     }
 
-    private boolean dispatch(HttpRequest request) throws IOException {
-        var dispatched = false;
+    private void dispatch(HttpRequest request) throws IOException {
         var lookupResult = this.routeTree.lookup(request.method(), request.path());
 
         switch (lookupResult.kind()) {
-            case LookupKind.NOT_FOUND -> writeResponse(HttpResponse.empty(404));
-            case LookupKind.METHOD_NOT_ALLOWED -> writeResponse(HttpResponse.empty(405));
-            default -> dispatched = true;
+            case LookupKind.NOT_FOUND -> throw HttpException.notFound();
+            case LookupKind.METHOD_NOT_ALLOWED -> throw HttpException.methodNotAllowed();
         }
 
         if (lookupResult.cluster() != this.cluster) {
             this.cluster = lookupResult.cluster();
             openNewSocket();
         }
-
-        return dispatched;
     }
 
     @Override

@@ -23,9 +23,9 @@ public class ResponseParser {
         var parts = parseResponseLine(raw[0]);
 
         return HttpResponse.builder()
-                .version(HttpVersion.valueOf(parts[0]))
+                .version(HttpVersion.from(parts[0]))
                 .status(Integer.parseInt(parts[1]))
-                .headers(HeaderParser.parseHeaders(
+                .headers(HeaderParser.parseResponseHeaders(
                         Arrays.copyOfRange(raw, 1, raw.length)
                 ))
                 .body(body)

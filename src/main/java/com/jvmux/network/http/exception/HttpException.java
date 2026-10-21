@@ -36,6 +36,14 @@ public class HttpException extends RuntimeException {
         return new HttpException(502, "Bad Gateway Error");
     }
 
+    public static HttpException notFound() {
+        return new HttpException(404, "Requested url not found");
+    }
+
+    public static HttpException methodNotAllowed() {
+        return new HttpException(405, "Method now allowed for this url");
+    }
+
     @Override
     public synchronized Throwable fillInStackTrace() {
         return this;

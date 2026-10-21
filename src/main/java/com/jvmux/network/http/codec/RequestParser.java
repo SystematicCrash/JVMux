@@ -24,7 +24,7 @@ public class RequestParser {
                 .method(HttpMethod.from(parts[0]))
                 .path(parts[1])
                 .version(HttpVersion.from(parts[2]))
-                .headers(HeaderParser.parseHeaders(
+                .headers(HeaderParser.parseRequestHeaders(
                         Arrays.copyOfRange(raw, 1, raw.length)
                 ))
                 .body(body)

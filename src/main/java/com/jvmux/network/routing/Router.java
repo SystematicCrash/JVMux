@@ -37,6 +37,6 @@ public class Router {
     }
 
     private void registerDefaultRoutes() {
-        this.add("/files", new Cluster("/api/users", Set.of()), GET, DELETE, POST);
+        this.add("/files", new Cluster(Set.of()), GET, DELETE, POST);
     }
 }

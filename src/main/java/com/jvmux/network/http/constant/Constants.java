@@ -1,6 +1,7 @@
 package com.jvmux.network.http.constant;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public final class Constants {
 
@@ -43,9 +44,30 @@ public final class Constants {
     public static final Set<String> UNIQUE_HEADERS = Set.of(
             HttpHeader.HOST,
             HttpHeader.CONTENT_LENGTH,
-            HttpHeader.TRANSFER_ENCODING
+            HttpHeader.TRANSFER_ENCODING,
+            HttpHeader.CONTENT_TYPE,
+            HttpHeader.AUTHORIZATION,
+            HttpHeader.USER_AGENT,
+            HttpHeader.REFERER,
+            HttpHeader.DATE,
+            HttpHeader.LOCATION,
+            HttpHeader.ETAG,
+            HttpHeader.LAST_MODIFIED,
+            HttpHeader.RETRY_AFTER,
+            HttpHeader.SERVER
     );
-    public static final Set<String> MANDATORY_HEADERS = Set.of(
-            HttpHeader.HOST
+
+    public static final Set<String> REQUEST_MANDATORY_HEADERS = Set.of(
+            HttpHeader.HOST,
+            HttpHeader.CONTENT_TYPE
+    );
+
+    public static final Set<String> RESPONSE_MANDATORY_HEADERS = Set.of(
+            HttpHeader.DATE
+    );
+
+    public static final Set<String> PAYLOAD_SPECIFIER_HEADERS = Set.of(
+            HttpHeader.CONTENT_LENGTH,
+            HttpHeader.TRANSFER_ENCODING
     );
 }
