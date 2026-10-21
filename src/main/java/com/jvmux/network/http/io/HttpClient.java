@@ -11,6 +11,7 @@ public class HttpClient {
 
     public static void writeRequest(HttpRequest request, OutputStream out) throws IOException {
         out.write(RequestEncoder.encode(request));
+        request.getWriter().write(out);
     }
 
     public static HttpResponse readResponse(InputStream in) throws IOException {

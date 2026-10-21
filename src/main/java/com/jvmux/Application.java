@@ -1,7 +1,7 @@
 package com.jvmux;
 
 import com.jvmux.network.routing.Router;
-import com.jvmux.network.session.ConnectionSession;
+import com.jvmux.network.proxy.ProxyRelay;
 import com.jvmux.network.tcp.TCPServer;
 
 import java.util.concurrent.Executors;
@@ -16,7 +16,7 @@ public class Application {
         while (!tcpServer.isClosed()) {
             var socket = tcpServer.accept();
             executor.submit(() -> {
-                try(var session = new ConnectionSession(socket, new Router().build())) {
+                try(var session = new ProxyRelay(socket, new Router().build())) {
                     session.run();
                 } catch (Exception e) {
                     throw new RuntimeException(e);
