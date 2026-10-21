@@ -1,6 +1,7 @@
 package com.jvmux.network.routing;
 
 import com.jvmux.network.http.constant.HttpMethod;
+import com.jvmux.network.upstream.Cluster;
 
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -9,40 +10,37 @@ import java.util.Map;
 
 public class RouteNode {
     private final Map<String, RouteNode> children = new HashMap<>();
-    public final EnumMap<HttpMethod, Handler> handlers = new EnumMap<>(HttpMethod.class);
+    public final EnumMap<HttpMethod, Cluster> clusters = new EnumMap<>(HttpMethod.class);
 
     public LookupResult lookup(HttpMethod method, String[] segments, int idx, Map<String, String> params) {
         if (idx == segments.length) {
-            return this.lookupHandlers(method);
+            return this.lookupClusters(method);
         }
 
         var segment = segments[idx];
 
-        return this.lookupChildren(segment, method, segments, idx + 1, params)
-                .orElseGet(() -> LookupResult.builder()
-                        .kind(LookupKind.NOT_FOUND)
-                        .build());
+        return this.lookupChildren(segment, method, segments, idx + 1, params);
     }
 
     public RouteNode insert(String segment) {
         return this.children.computeIfAbsent(segment, k -> new RouteNode());
     }
 
-    private LookupResult lookupHandlers(HttpMethod method) {
-        var handlerOpt = Optional.ofNullable(this.handlers.get(method))
-                .or(() -> Optional.ofNullable(this.handlers.get(HttpMethod.ANY)));
+    private LookupResult lookupClusters(HttpMethod method) {
+        var clusterOpt = Optional.ofNullable(this.clusters.get(method))
+                .or(() -> Optional.ofNullable(this.clusters.get(HttpMethod.ANY)));
 
-        if (handlerOpt.isPresent()) {
+        if (clusterOpt.isPresent()) {
             return LookupResult.builder()
                     .kind(LookupKind.FOUND)
-                    .handler(handlerOpt.get())
+                    .cluster(clusterOpt.get())
                     .build();
         }
 
-        if (!this.handlers.isEmpty()) {
+        if (!this.clusters.isEmpty()) {
             return LookupResult.builder()
                     .kind(LookupKind.METHOD_NOT_ALLOWED)
-                    .allowed(this.handlers.keySet())
+                    .allowed(this.clusters.keySet())
                     .build();
         }
 
@@ -51,15 +49,18 @@ public class RouteNode {
                 .build();
     }
 
-    private Optional<LookupResult> lookupChildren(
+    private LookupResult lookupChildren(
             String segment,
             HttpMethod method,
             String[] segments,
             int nextIdx,
             Map<String, String> params
     ) {
-        return Optional.ofNullable(this.children.get(segment))
-                .map(child -> child.lookup(method, segments, nextIdx, params))
-                .filter(res -> res.kind() != LookupKind.NOT_FOUND);
+        var child = this.children.get(segment);
+        
+        if (child == null) {
+            return this.lookupClusters(method);
+        }
+        return child.lookup(method, segments, nextIdx, params);
     }
 }

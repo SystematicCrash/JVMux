@@ -14,8 +14,9 @@ public class Application {
         var executor = Executors.newVirtualThreadPerTaskExecutor();
 
         while (!tcpServer.isClosed()) {
+            var socket = tcpServer.accept();
             executor.submit(() -> {
-                try(var session = new ConnectionSession(tcpServer.accept(), new Router().build())) {
+                try(var session = new ConnectionSession(socket, new Router().build())) {
                     session.run();
                 } catch (Exception e) {
                     throw new RuntimeException(e);

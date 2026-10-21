@@ -1,6 +1,7 @@
 package com.jvmux.network.routing;
 
 import com.jvmux.network.http.constant.HttpMethod;
+import com.jvmux.network.upstream.Cluster;
 import lombok.Getter;
 
 import java.util.*;
@@ -16,7 +17,7 @@ public class Router {
         this.registerDefaultRoutes();
     }
 
-    public void add(String path, Handler handler, HttpMethod... methods) {
+    public void add(String path, Cluster handler, HttpMethod... methods) {
         var set = EnumSet.noneOf(HttpMethod.class);
 
         if (methods.length == 0) set = EnumSet.of(HttpMethod.ANY);
@@ -26,7 +27,7 @@ public class Router {
                 RouteSpec.builder()
                         .methods(set)
                         .path(path)
-                        .handler(handler)
+                        .cluster(handler)
                         .build()
         );
     }
@@ -36,6 +37,6 @@ public class Router {
     }
 
     private void registerDefaultRoutes() {
-        this.add("/files", new Handler("localhost", 1234), GET, DELETE, POST);
+        this.add("/files", new Cluster("/api/users", Set.of()), GET, DELETE, POST);
     }
 }

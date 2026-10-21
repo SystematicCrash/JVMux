@@ -5,16 +5,16 @@ import com.jvmux.network.http.io.HttpClient;
 import com.jvmux.network.http.io.HttpServer;
 import com.jvmux.network.http.model.HttpRequest;
 import com.jvmux.network.http.model.HttpResponse;
-import com.jvmux.network.routing.Handler;
 import com.jvmux.network.routing.LookupKind;
 import com.jvmux.network.routing.RouteTree;
 import com.jvmux.network.tcp.TCPClient;
+import com.jvmux.network.upstream.Cluster;
 
 import java.io.IOException;
 import java.net.Socket;
 
 public class ConnectionSession implements Runnable, AutoCloseable {
-    private Handler handler;
+    private Cluster cluster;
     private Socket serverSocket;
     private TrafficSide upstream;
 
@@ -73,7 +73,8 @@ public class ConnectionSession implements Runnable, AutoCloseable {
     }
 
     private void openNewSocket() throws IOException {
-        this.serverSocket = TCPClient.connect(this.handler.host(), this.handler.port());
+        var server = this.cluster.getRandomServer();
+        this.serverSocket = TCPClient.connect(server.host(), server.port());
         this.upstream = new TrafficSide(
                 this.serverSocket.getInputStream(),
                 this.serverSocket.getOutputStream()
@@ -85,15 +86,13 @@ public class ConnectionSession implements Runnable, AutoCloseable {
         var lookupResult = this.routeTree.lookup(request.method(), request.path());
 
         switch (lookupResult.kind()) {
-            case LookupKind.NOT_FOUND ->
-                writeResponse(HttpResponse.empty(404));
-            case LookupKind.METHOD_NOT_ALLOWED ->
-                writeResponse(HttpResponse.empty(405));
+            case LookupKind.NOT_FOUND -> writeResponse(HttpResponse.empty(404));
+            case LookupKind.METHOD_NOT_ALLOWED -> writeResponse(HttpResponse.empty(405));
             default -> dispatched = true;
         }
 
-        if (lookupResult.handler() != this.handler) {
-            this.handler = lookupResult.handler();
+        if (lookupResult.cluster() != this.cluster) {
+            this.cluster = lookupResult.cluster();
             openNewSocket();
         }
 
@@ -103,6 +102,9 @@ public class ConnectionSession implements Runnable, AutoCloseable {
     @Override
     public void close() throws Exception {
         this.clientSocket.close();
-        this.serverSocket.close();
+
+        if (this.serverSocket != null) {
+            this.serverSocket.close();
+        }
     }
 }

@@ -1,6 +1,7 @@
 package com.jvmux.network.routing;
 
 import com.jvmux.network.http.constant.HttpMethod;
+import com.jvmux.network.upstream.Cluster;
 import lombok.Builder;
 
 import java.util.EnumSet;
@@ -9,5 +10,5 @@ import java.util.EnumSet;
 public record RouteSpec(
         String path,
         EnumSet<HttpMethod> methods,
-        Handler handler
+        Cluster cluster
 ) {}
