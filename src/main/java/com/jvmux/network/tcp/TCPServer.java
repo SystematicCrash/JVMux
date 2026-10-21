@@ -1,44 +1,35 @@
 package com.jvmux.network.tcp;
 
-import com.jvmux.network.session.ConnectionSession;
-
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.net.Socket;
+
+import static com.jvmux.network.tcp.Constants.SERVER_IDLE_TIMEOUT;
+import static com.jvmux.network.tcp.Constants.TCP_NO_DELAY;
 
 public class TCPServer implements AutoCloseable {
 
-    private final int port;
-    private volatile ExecutorService executor;
-    private volatile ServerSocket serverSocket;
-    private volatile boolean running = false;
+    private final ServerSocket serverSocket;
 
-    public TCPServer(int port) {
-        this.port = port;
+    public TCPServer(int port) throws IOException {
+        this.serverSocket = new ServerSocket(port);
     }
 
-    public void start() throws IOException {
-        this.running = true;
-        this.serverSocket = new ServerSocket(this.port);
-        this.executor = Executors.newVirtualThreadPerTaskExecutor();
+    public Socket accept() throws IOException {
+        var socket = this.serverSocket.accept();
 
-        try (this) {
-            while (running && !serverSocket.isClosed()) {
-                var clientSocket = serverSocket.accept();
-                this.executor.submit(() -> ConnectionSession.from(clientSocket));
-            }
-        }
+        socket.setSoTimeout(SERVER_IDLE_TIMEOUT);
+        socket.setTcpNoDelay(TCP_NO_DELAY);
+
+        return socket;
+    }
+
+    public boolean isClosed() {
+        return this.serverSocket.isClosed();
     }
 
     @Override
     public void close() throws IOException {
-        this.running = false;
-
-        if (this.serverSocket != null)
-            this.serverSocket.close();
-
-        if (this.executor != null)
-            this.executor.close();
+        this.serverSocket.close();
     }
 }
