@@ -7,17 +7,28 @@ import java.net.Socket;
 import static com.jvmux.network.tcp.Constants.CLIENT_IDLE_TIMEOUT;
 import static com.jvmux.network.tcp.Constants.TCP_NO_DELAY;
 
-public class TCPClient {
+public class TCPClient implements AutoCloseable {
 
-    public <T> T execute(String host, int port, ConnectionProcessor<T> connHandler) {
-        try(var socket = new Socket()) {
-            socket.setTcpNoDelay(TCP_NO_DELAY);
-            socket.setSoTimeout(CLIENT_IDLE_TIMEOUT);
-            socket.connect(new InetSocketAddress(host, port), CLIENT_IDLE_TIMEOUT);
+    private final Socket socket;
 
-            return connHandler.process(socket.getInputStream(), socket.getOutputStream());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    public TCPClient() {
+        this.socket = new Socket();
+    }
+
+    public Socket connect(String host, int port) throws IOException {
+        socket.setTcpNoDelay(TCP_NO_DELAY);
+        socket.setSoTimeout(CLIENT_IDLE_TIMEOUT);
+        socket.connect(new InetSocketAddress(host, port), CLIENT_IDLE_TIMEOUT);
+
+        return this.socket;
+    }
+
+    public boolean isClosed() {
+        return this.socket.isClosed();
+    }
+
+    @Override
+    public void close() throws Exception {
+        this.socket.close();
     }
 }
