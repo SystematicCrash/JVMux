@@ -62,10 +62,6 @@ public final class Constants {
             HttpHeader.CONTENT_TYPE
     );
 
-    public static final Set<String> RESPONSE_MANDATORY_HEADERS = Set.of(
-            HttpHeader.DATE
-    );
-
     public static final Set<String> PAYLOAD_SPECIFIER_HEADERS = Set.of(
             HttpHeader.CONTENT_LENGTH,
             HttpHeader.TRANSFER_ENCODING

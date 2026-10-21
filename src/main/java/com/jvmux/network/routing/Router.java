@@ -2,6 +2,7 @@ package com.jvmux.network.routing;
 
 import com.jvmux.network.http.constant.HttpMethod;
 import com.jvmux.network.upstream.Cluster;
+import com.jvmux.network.upstream.Server;
 import lombok.Getter;
 
 import java.util.*;
@@ -37,6 +38,6 @@ public class Router {
     }
 
     private void registerDefaultRoutes() {
-        this.add("/files", new Cluster(Set.of()), GET, DELETE, POST);
+        this.add("/", new Cluster(Set.of()), GET, DELETE, POST);
     }
 }

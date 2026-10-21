@@ -7,8 +7,6 @@ import com.jvmux.network.http.model.HttpResponse;
 
 import java.io.*;
 
-import static com.jvmux.network.http.constant.Constants.CRLF;
-
 public class HttpServer {
 
     public static HttpRequest readRequest(InputStream in) throws IOException {
@@ -20,7 +18,8 @@ public class HttpServer {
         out.write(ResponseEncoder.encode(response));
         var bodyWriter = response.getWriter();
 
-        if (bodyWriter.isPresent()) bodyWriter.get().write(out);
-        else out.write(CRLF.getBytes());
+        if (bodyWriter.isPresent()) {
+            bodyWriter.get().write(out);
+        }
     }
 }

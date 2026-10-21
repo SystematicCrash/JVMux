@@ -12,6 +12,7 @@ import com.jvmux.network.upstream.Cluster;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 
 public class ProxyRelay implements Runnable, AutoCloseable {
 
@@ -19,9 +20,9 @@ public class ProxyRelay implements Runnable, AutoCloseable {
     private final RouteTree routeTree;
     private final StreamPair downstream;
 
-    private Cluster currentCluster;
-    private Socket upstreamSocket;
     private StreamPair upstream;
+    private Socket upstreamSocket;
+    private Cluster currentCluster;
 
     public ProxyRelay(Socket clientSocket, RouteTree routeTree) throws IOException {
         this.clientSocket = clientSocket;
@@ -86,16 +87,23 @@ public class ProxyRelay implements Runnable, AutoCloseable {
         return lookupResult.cluster();
     }
 
-    private void ensureUpstreamConnection(Cluster targetCluster) throws IOException {
+    private void ensureUpstreamConnection(Cluster targetCluster) {
         if (this.currentCluster != targetCluster || upstreamSocket == null || upstreamSocket.isClosed()) {
             closeUpstream();
             this.currentCluster = targetCluster;
             var server = targetCluster.getRandomServer();
-            this.upstreamSocket = TCPClient.connect(server.host(), server.port());
-            this.upstream = new StreamPair(
-                    this.upstreamSocket.getInputStream(),
-                    this.upstreamSocket.getOutputStream()
-            );
+
+            try {
+                this.upstreamSocket = TCPClient.connect(server.host(), server.port());
+                this.upstream = new StreamPair(
+                        this.upstreamSocket.getInputStream(),
+                        this.upstreamSocket.getOutputStream()
+                );
+            } catch (SocketTimeoutException e) {
+                throw HttpException.gatewayTimeout();
+            } catch (IOException e) {
+                throw HttpException.badGateway();
+            }
         }
     }
 

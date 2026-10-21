@@ -12,10 +12,6 @@ import static com.jvmux.network.http.constant.Constants.*;
 
 public class ResponseParser {
 
-    public static HttpResponse parse(String[] raw) {
-        return parse(raw, null);
-    }
-
     public static HttpResponse parse(String[] raw, InputStream body) {
         if (raw.length == 0) {
             throw HttpException.badGateway();
@@ -36,9 +32,9 @@ public class ResponseParser {
         if (line.isEmpty()) {
             throw HttpException.badGateway();
         }
-        var parts = line.split(String.valueOf(SP));
+        var parts = line.split(String.valueOf(SP), 3);
 
-        if (parts.length != 3 && parts.length != 2) {
+        if (parts.length < 2) {
             throw HttpException.badGateway();
         }
 

@@ -7,16 +7,15 @@ import com.jvmux.network.http.model.HttpResponse;
 
 import java.io.*;
 
-import static com.jvmux.network.http.constant.Constants.CRLF;
-
 public class HttpClient {
 
     public static void writeRequest(HttpRequest request, OutputStream out) throws IOException {
         out.write(RequestEncoder.encode(request));
         var bodyWriter = request.getWriter();
 
-        if (bodyWriter.isPresent()) bodyWriter.get().write(out);
-        else out.write(CRLF.getBytes());
+        if (bodyWriter.isPresent()) {
+            bodyWriter.get().write(out);
+        }
     }
 
     public static HttpResponse readResponse(InputStream in) throws IOException {

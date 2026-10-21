@@ -44,6 +44,10 @@ public class HttpException extends RuntimeException {
         return new HttpException(405, "Method now allowed for this url");
     }
 
+    public static HttpException gatewayTimeout() {
+        return new HttpException(504, "Gateway Timeout Error");
+    }
+
     @Override
     public synchronized Throwable fillInStackTrace() {
         return this;

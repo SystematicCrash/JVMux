@@ -72,10 +72,9 @@ public class HeaderParser {
     }
 
     private static void checkResponseHeaders(Set<String> headers) {
-        var hasMandatory = headers.containsAll(RESPONSE_MANDATORY_HEADERS);
         var hasPayloadSpecifier = !Collections.disjoint(headers, PAYLOAD_SPECIFIER_HEADERS);
 
-        if (!hasMandatory || !hasPayloadSpecifier) {
+        if (!hasPayloadSpecifier) {
             throw new IllegalArgumentException("Invalid Headers");
         }
     }
