@@ -1,4 +1,4 @@
-package com.jvmux.network.http.codec;
+package com.jvmux.network.http.codec.decode;
 
 import com.jvmux.common.Pair;
 

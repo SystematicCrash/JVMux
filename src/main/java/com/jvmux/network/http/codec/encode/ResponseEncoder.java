@@ -1,4 +1,4 @@
-package com.jvmux.network.http.codec;
+package com.jvmux.network.http.codec.encode;
 
 import com.jvmux.network.http.constant.HttpVersion;
 import com.jvmux.network.http.model.HttpResponse;

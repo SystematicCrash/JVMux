@@ -1,11 +1,13 @@
 package com.jvmux.network.http.io;
 
-import com.jvmux.network.http.codec.RequestParser;
-import com.jvmux.network.http.codec.ResponseEncoder;
+import com.jvmux.network.http.codec.decode.RequestParser;
+import com.jvmux.network.http.codec.encode.ResponseEncoder;
 import com.jvmux.network.http.model.HttpRequest;
 import com.jvmux.network.http.model.HttpResponse;
 
 import java.io.*;
+
+import static com.jvmux.network.http.constant.Constants.CRLF;
 
 public class HttpServer {
 
@@ -16,6 +18,9 @@ public class HttpServer {
 
     public static void writeResponse(HttpResponse response, OutputStream out) throws IOException {
         out.write(ResponseEncoder.encode(response));
-        response.getWriter().write(out);
+        var bodyWriter = response.getWriter();
+
+        if (bodyWriter.isPresent()) bodyWriter.get().write(out);
+        else out.write(CRLF.getBytes());
     }
 }

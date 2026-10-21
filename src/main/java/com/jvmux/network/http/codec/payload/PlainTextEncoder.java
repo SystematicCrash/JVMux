@@ -1,8 +1,8 @@
-package com.jvmux.network.http.body;
+package com.jvmux.network.http.codec.payload;
 
 import java.nio.charset.StandardCharsets;
 
-public class HtmlEncoder implements BodyEncoder {
+public class PlainTextEncoder implements PayloadEncoder {
 
     @Override
     public byte[] encode(Object content) {
@@ -11,6 +11,6 @@ public class HtmlEncoder implements BodyEncoder {
 
     @Override
     public String contentType() {
-        return "text/html";
+        return "text/plain";
     }
 }

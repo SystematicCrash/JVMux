@@ -1,4 +1,4 @@
-package com.jvmux.network.http.io;
+package com.jvmux.network.http.body;
 
 import lombok.AllArgsConstructor;
 

@@ -1,11 +1,11 @@
 package com.jvmux.network.http.model;
 
-import com.jvmux.network.http.body.BodyEncoder;
-import com.jvmux.network.http.body.HtmlEncoder;
-import com.jvmux.network.http.body.JsonEncoder;
-import com.jvmux.network.http.body.PlainTextEncoder;
-import com.jvmux.network.http.io.BodyWriter;
-import com.jvmux.network.http.io.BodyWriterFactory;
+import com.jvmux.network.http.codec.payload.PayloadEncoder;
+import com.jvmux.network.http.codec.payload.HtmlEncoder;
+import com.jvmux.network.http.codec.payload.JsonEncoder;
+import com.jvmux.network.http.codec.payload.PlainTextEncoder;
+import com.jvmux.network.http.body.BodyWriter;
+import com.jvmux.network.http.body.BodyWriterFactory;
 import com.jvmux.network.http.constant.HttpHeader;
 import com.jvmux.network.http.constant.HttpVersion;
 import lombok.Builder;
@@ -14,6 +14,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Builder
 public record HttpResponse(
@@ -47,7 +48,7 @@ public record HttpResponse(
         this.headers.put(header, value);
     }
 
-    public BodyWriter getWriter() {
+    public Optional<BodyWriter> getWriter() {
         return BodyWriterFactory.create(this.body, this.headers);
     }
 
@@ -63,7 +64,7 @@ public record HttpResponse(
         return from(status, content, new JsonEncoder());
     }
 
-    private static HttpResponse from(int status, Object content, BodyEncoder encoder) {
+    private static HttpResponse from(int status, Object content, PayloadEncoder encoder) {
         byte[] bytes = encoder.encode(content);
         var res = builder()
                 .version(HttpVersion.HTTP_1_1)

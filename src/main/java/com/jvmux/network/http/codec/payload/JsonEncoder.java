@@ -1,8 +1,8 @@
-package com.jvmux.network.http.body;
+package com.jvmux.network.http.codec.payload;
 
 import java.nio.charset.StandardCharsets;
 
-public class JsonEncoder implements BodyEncoder {
+public class JsonEncoder implements PayloadEncoder {
 
     @Override
     public byte[] encode(Object content) {
