@@ -1,5 +1,6 @@
 package com.jvmux.network.proxy;
 
+import com.jvmux.network.http.constant.HttpHeader;
 import com.jvmux.network.http.exception.HttpException;
 import com.jvmux.network.http.io.HttpClient;
 import com.jvmux.network.http.model.HttpRequest;
@@ -8,47 +9,77 @@ import com.jvmux.network.routing.LookupKind;
 import com.jvmux.network.routing.RouteTree;
 import com.jvmux.network.tcp.TCPClient;
 import com.jvmux.network.upstream.Cluster;
+import com.jvmux.network.upstream.Server;
 
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.util.HashMap;
 
 public class UpstreamHandler implements AutoCloseable {
-
+    private static final int MAX_ATTEMPTS = 2;
     private final RouteTree routeTree;
     private Cluster currentCluster;
     private Socket upstreamSocket;
+    private Server currentServer;
     private StreamPair pipe;
 
     public UpstreamHandler(RouteTree routeTree) {
         this.routeTree = routeTree;
     }
 
-    public HttpResponse forward(HttpRequest request) throws IOException {
+    public HttpResponse forward(HttpRequest request) {
         Cluster targetCluster = resolveRoute(request);
         return forwardWithRetry(targetCluster, request);
     }
 
-    private HttpResponse forwardWithRetry(Cluster targetCluster, HttpRequest request) throws IOException {
-        ensureConnection(targetCluster);
+    private HttpResponse forwardWithRetry(Cluster targetCluster, HttpRequest request) {
+        for (int attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+            ensureConnection(targetCluster);
 
-        try {
-            HttpClient.writeRequest(request, pipe.out());
-            HttpResponse response = HttpClient.readResponse(pipe.in());
-            if (response != null) {
-                return response;
+            try {
+                HttpResponse response = sendAndReceive(request);
+                if (response != null) {
+                    return response;
+                }
+            } catch (IOException e) {
+                if (attempt == MAX_ATTEMPTS) {
+                    throw HttpException.badGateway("Failed communicating with upstream backend", e);
+                }
             }
-        } catch (IOException ignored) {}
 
-        close();
-        ensureConnection(targetCluster);
-
-        HttpClient.writeRequest(request, pipe.out());
-        HttpResponse response = HttpClient.readResponse(pipe.in());
-        if (response == null) {
-            throw HttpException.badGateway();
+            close();
         }
-        return response;
+
+        throw HttpException.badGateway();
+    }
+
+    private HttpResponse sendAndReceive(HttpRequest request) throws IOException {
+        request = prepareForUpstream(request, this.currentServer);
+        HttpClient.writeRequest(request, pipe.out());
+        return HttpClient.readResponse(pipe.in());
+    }
+
+    private HttpRequest prepareForUpstream(HttpRequest request, Server server) {
+        var headers = new HashMap<>(request.headers());
+
+        String originalHost = headers.get(HttpHeader.HOST);
+        if (originalHost != null && !headers.containsKey(HttpHeader.X_FORWARDED_HOST)) {
+            headers.put(HttpHeader.X_FORWARDED_HOST, originalHost);
+        }
+
+        String targetHost = (server.port() == 80 || server.port() == 443)
+                ? server.host()
+                : server.host() + ":" + server.port();
+        headers.put(HttpHeader.HOST, targetHost);
+
+        return HttpRequest.builder()
+                .method(request.method())
+                .path(request.path())
+                .version(request.version())
+                .headers(headers)
+                .body(request.body())
+                .build();
     }
 
     private Cluster resolveRoute(HttpRequest request) {
@@ -66,10 +97,12 @@ public class UpstreamHandler implements AutoCloseable {
         if (this.currentCluster != targetCluster || upstreamSocket == null || upstreamSocket.isClosed()) {
             close();
             this.currentCluster = targetCluster;
-            var server = targetCluster.getRandomServer();
+            this.currentServer = targetCluster.getRandomServer();
 
             try {
-                this.upstreamSocket = TCPClient.connect(server.host(), server.port());
+                this.upstreamSocket = TCPClient.connect(
+                        this.currentServer.host(), this.currentServer.port()
+                );
                 this.pipe = new StreamPair(
                         this.upstreamSocket.getInputStream(),
                         this.upstreamSocket.getOutputStream()
@@ -77,7 +110,9 @@ public class UpstreamHandler implements AutoCloseable {
             } catch (SocketTimeoutException e) {
                 throw HttpException.gatewayTimeout(e);
             } catch (IOException e) {
-                throw HttpException.badGateway("Failed to connect to backend " + server.host() + ":" + server.port(), e);
+                throw HttpException.badGateway(
+                        "Failed to connect to backend " + this.currentServer.host() + ":" + this.currentServer.port(), e
+                );
             }
         }
     }
