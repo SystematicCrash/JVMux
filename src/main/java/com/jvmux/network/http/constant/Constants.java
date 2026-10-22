@@ -58,8 +58,7 @@ public final class Constants {
     );
 
     public static final Set<String> REQUEST_MANDATORY_HEADERS = Set.of(
-            HttpHeader.HOST,
-            HttpHeader.CONTENT_TYPE
+            HttpHeader.HOST
     );
 
     public static final Set<String> PAYLOAD_SPECIFIER_HEADERS = Set.of(
