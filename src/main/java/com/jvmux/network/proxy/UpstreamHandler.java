@@ -64,7 +64,7 @@ public class UpstreamHandler implements AutoCloseable {
     }
 
     private HttpRequest prepareForUpstream(HttpRequest request, Server server) {
-        var headers = new HashMap<>(request.headers());
+        var headers = new HashMap<>(request.getHeaders());
 
         var targetHost = (server.port() == 80 || server.port() == 443)
                 ? server.host()
@@ -86,16 +86,16 @@ public class UpstreamHandler implements AutoCloseable {
         headers.put(HttpHeader.X_FORWARDED_PORT, String.valueOf(client.localPort()));
 
         return HttpRequest.builder()
-                .method(request.method())
-                .path(request.path())
-                .version(request.version())
+                .method(request.getMethod())
+                .path(request.getPath())
+                .version(request.getVersion())
                 .headers(headers)
-                .body(request.body())
+                .body(request.getBody())
                 .build();
     }
 
     private Cluster resolveRoute(HttpRequest request) {
-        var lookupResult = this.routeTree.lookup(request.method(), request.path());
+        var lookupResult = this.routeTree.lookup(request.getMethod(), request.getPath());
         if (lookupResult.kind() == LookupKind.NOT_FOUND) {
             throw HttpException.notFound();
         }

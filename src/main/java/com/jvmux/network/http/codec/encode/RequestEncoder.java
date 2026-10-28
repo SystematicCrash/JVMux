@@ -13,9 +13,9 @@ public class RequestEncoder {
     public static byte[] encode(HttpRequest request) {
         var sb = new StringBuilder();
 
-        sb.append(encodeRequestLine(request.version(), request.path(), request.method()));
+        sb.append(encodeRequestLine(request.getVersion(), request.getPath(), request.getMethod()));
 
-        for (var header : request.headers().entrySet()) {
+        for (var header : request.getHeaders().entrySet()) {
             sb.append(header.getKey())
                     .append(COLON)
                     .append(SP)
