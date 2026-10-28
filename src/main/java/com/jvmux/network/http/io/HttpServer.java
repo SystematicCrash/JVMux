@@ -13,7 +13,7 @@ import java.io.OutputStream;
 public class HttpServer {
 
     public static HttpRequest readRequest(InputStream in) throws IOException {
-        String[] raw = HttpHeaderReader.readHeaders(in, false);
+        String[] raw = HeaderReader.readHeaders(in, false);
         if (raw == null) {
             return null;
         }

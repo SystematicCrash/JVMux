@@ -10,9 +10,9 @@ import java.nio.charset.StandardCharsets;
 
 import static com.jvmux.network.http.constant.Constants.*;
 
-public final class HttpHeaderReader {
+public final class HeaderReader {
 
-    private HttpHeaderReader() {}
+    private HeaderReader() {}
 
     public static String[] readHeaders(InputStream in, boolean isUpstream) throws IOException {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();

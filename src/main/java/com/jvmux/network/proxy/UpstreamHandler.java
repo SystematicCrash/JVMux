@@ -81,6 +81,7 @@ public class UpstreamHandler implements AutoCloseable {
             headers.put(HttpHeader.X_FORWARDED_HOST, originalHost);
         }
 
+        headers.put(HttpHeader.CONNECTION, "keep-alive");
         headers.put(HttpHeader.X_FORWARDED_PROTO, "http");
         headers.put(HttpHeader.X_FORWARDED_PORT, String.valueOf(client.localPort()));
 

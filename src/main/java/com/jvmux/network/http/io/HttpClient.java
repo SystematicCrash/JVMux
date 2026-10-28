@@ -23,7 +23,7 @@ public class HttpClient {
     }
 
     public static HttpResponse readResponse(InputStream in) throws IOException {
-        String[] raw = HttpHeaderReader.readHeaders(in, true);
+        String[] raw = HeaderReader.readHeaders(in, true);
         if (raw == null) {
             return null;
         }

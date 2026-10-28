@@ -1,6 +1,5 @@
 package com.jvmux.network.proxy;
 
-import com.jvmux.network.http.constant.HttpHeader;
 import com.jvmux.network.http.model.HttpRequest;
 import com.jvmux.network.http.model.HttpResponse;
 import com.jvmux.network.model.Client;
@@ -35,16 +34,18 @@ public class ProxyRelay implements Runnable, AutoCloseable {
 
             try {
                 HttpResponse response = upstream.forward(request);
-                downstream.forward(response);
-                boolean upstreamClose = "close".equalsIgnoreCase(response.getHeader(HttpHeader.CONNECTION));
-                boolean clientClose = "close".equalsIgnoreCase(request.getHeader(HttpHeader.CONNECTION));
 
-                if (upstreamClose) {
-                    upstream.close();
-                }
+                boolean clientClose = request.isCloseConnection();
+
                 if (clientClose) {
-                    break;
+                    response.setAsLast();
                 }
+                downstream.forward(response);
+
+                boolean upstreamClose = response.isCloseConnection();
+
+                if (upstreamClose) upstream.close();
+                if (clientClose) break;
 
             } catch (Exception e) {
                 downstream.forwardErr(e);

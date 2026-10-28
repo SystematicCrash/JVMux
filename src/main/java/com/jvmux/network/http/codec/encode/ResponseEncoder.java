@@ -15,18 +15,16 @@ public class ResponseEncoder {
     public static byte[] encode(HttpResponse response) {
         var sb = new StringBuilder();
 
-        sb.append(encodeResponseLine(response.version(), response.status()));
+        sb.append(encodeResponseLine(response.getVersion(), response.getStatus()));
 
-        if (response.headers() != null) {
-            for (var header : response.headers().entrySet()) {
-                sb.append(header.getKey())
-                        .append(COLON)
-                        .append(SP)
-                        .append(header.getValue())
-                        .append(CRLF);
-            }
-            sb.append(CRLF);
+        for (var header : response.getHeaders().entrySet()) {
+            sb.append(header.getKey())
+                    .append(COLON)
+                    .append(SP)
+                    .append(header.getValue())
+                    .append(CRLF);
         }
+        sb.append(CRLF);
 
         return sb.toString().getBytes(StandardCharsets.US_ASCII);
     }

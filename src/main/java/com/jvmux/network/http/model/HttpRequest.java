@@ -1,5 +1,6 @@
 package com.jvmux.network.http.model;
 
+import com.jvmux.network.http.constant.HttpHeader;
 import com.jvmux.network.http.constant.HttpMethod;
 import com.jvmux.network.http.constant.HttpVersion;
 import com.jvmux.network.http.body.BodyWriter;
@@ -24,6 +25,10 @@ public record HttpRequest(
 
     public boolean hasHeader(String name) {
         return this.headers.containsKey(name);
+    }
+
+    public boolean isCloseConnection() {
+        return getHeader(HttpHeader.CONNECTION).equalsIgnoreCase("close");
     }
 
     public Optional<BodyWriter> getWriter() {
