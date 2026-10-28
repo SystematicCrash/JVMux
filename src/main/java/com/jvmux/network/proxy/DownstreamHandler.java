@@ -15,10 +15,7 @@ public class DownstreamHandler implements AutoCloseable {
 
     public DownstreamHandler(Socket clientSocket) throws IOException {
         this.clientSocket = clientSocket;
-        this.pipe = new StreamPair(
-                clientSocket.getInputStream(),
-                clientSocket.getOutputStream()
-        );
+        this.pipe = StreamPair.from(this.clientSocket);
     }
 
     public HttpRequest receive() throws IOException {

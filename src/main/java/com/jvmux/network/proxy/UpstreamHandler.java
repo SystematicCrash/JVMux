@@ -112,12 +112,10 @@ public class UpstreamHandler implements AutoCloseable {
 
             try {
                 this.upstreamSocket = TCPClient.connect(
-                        this.currentServer.host(), this.currentServer.port()
+                        this.currentServer.host(),
+                        this.currentServer.port()
                 );
-                this.pipe = new StreamPair(
-                        this.upstreamSocket.getInputStream(),
-                        this.upstreamSocket.getOutputStream()
-                );
+                this.pipe = StreamPair.from(this.upstreamSocket);
             } catch (SocketTimeoutException e) {
                 throw HttpException.gatewayTimeout(e);
             } catch (IOException e) {

@@ -88,10 +88,11 @@ public record HttpResponse(
     private HttpResponse applyDefaultFraming() {
         setHeader(HttpHeader.HOST, "JVMux");
 
-        if (!hasHeader(HttpHeader.DATE)) {
-            var date = DateTimeFormatter.RFC_1123_DATE_TIME.format(ZonedDateTime.now(ZoneOffset.UTC));
-            setHeader(HttpHeader.DATE, date);
-        }
+        if (!hasHeader(HttpHeader.DATE))
+            setHeader(
+                    HttpHeader.DATE,
+                    DateTimeFormatter.RFC_1123_DATE_TIME.format(ZonedDateTime.now(ZoneOffset.UTC))
+            );
 
         return this;
     }
