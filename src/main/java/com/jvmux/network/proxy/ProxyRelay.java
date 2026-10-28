@@ -3,6 +3,7 @@ package com.jvmux.network.proxy;
 import com.jvmux.network.http.constant.HttpHeader;
 import com.jvmux.network.http.model.HttpRequest;
 import com.jvmux.network.http.model.HttpResponse;
+import com.jvmux.network.model.Client;
 import com.jvmux.network.routing.RouteTree;
 
 import java.io.IOException;
@@ -10,12 +11,12 @@ import java.net.Socket;
 
 public class ProxyRelay implements Runnable, AutoCloseable {
 
-    private final DownstreamHandler downstream;
     private final UpstreamHandler upstream;
+    private final DownstreamHandler downstream;
 
     public ProxyRelay(Socket clientSocket, RouteTree routeTree) throws IOException {
         this.downstream = new DownstreamHandler(clientSocket);
-        this.upstream = new UpstreamHandler(routeTree);
+        this.upstream = new UpstreamHandler(routeTree, Client.from(clientSocket));
     }
 
     @Override

@@ -1,8 +1,7 @@
 package com.jvmux.network.routing;
 
 import com.jvmux.network.http.constant.HttpMethod;
-import com.jvmux.network.upstream.Cluster;
-import com.jvmux.network.upstream.Server;
+import com.jvmux.network.model.Cluster;
 import lombok.Getter;
 
 import java.util.*;

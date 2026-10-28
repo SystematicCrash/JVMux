@@ -8,13 +8,15 @@ import com.jvmux.network.http.model.HttpResponse;
 import com.jvmux.network.routing.LookupKind;
 import com.jvmux.network.routing.RouteTree;
 import com.jvmux.network.tcp.TCPClient;
-import com.jvmux.network.upstream.Cluster;
-import com.jvmux.network.upstream.Server;
+import com.jvmux.network.model.Client;
+import com.jvmux.network.model.Cluster;
+import com.jvmux.network.model.Server;
 
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.HashMap;
+import java.util.Map;
 
 public class UpstreamHandler implements AutoCloseable {
     private static final int MAX_ATTEMPTS = 2;
@@ -22,10 +24,12 @@ public class UpstreamHandler implements AutoCloseable {
     private Cluster currentCluster;
     private Socket upstreamSocket;
     private Server currentServer;
+    private final Client client;
     private StreamPair pipe;
 
-    public UpstreamHandler(RouteTree routeTree) {
+    public UpstreamHandler(RouteTree routeTree, Client clientContext) {
         this.routeTree = routeTree;
+        this.client = clientContext;
     }
 
     public HttpResponse forward(HttpRequest request) {
@@ -68,10 +72,7 @@ public class UpstreamHandler implements AutoCloseable {
             headers.put(HttpHeader.X_FORWARDED_HOST, originalHost);
         }
 
-        String targetHost = (server.port() == 80 || server.port() == 443)
-                ? server.host()
-                : server.host() + ":" + server.port();
-        headers.put(HttpHeader.HOST, targetHost);
+        prepareHeaders(headers, server);
 
         return HttpRequest.builder()
                 .method(request.method())
@@ -80,6 +81,26 @@ public class UpstreamHandler implements AutoCloseable {
                 .headers(headers)
                 .body(request.body())
                 .build();
+    }
+
+    private void prepareHeaders(Map<String, String> headers, Server server) {
+        var targetHost = (server.port() == 80 || server.port() == 443)
+                ? server.host()
+                : server.host() + ":" + server.port();
+        headers.put(HttpHeader.HOST, targetHost);
+
+        var forwardedFor = !headers.containsKey(HttpHeader.X_FORWARDED_FOR)
+                ? client.clientIp()
+                : headers.get(HttpHeader.X_FORWARDED_FOR) + ", " + client.clientIp();
+        headers.put(HttpHeader.X_FORWARDED_FOR, forwardedFor);
+
+        var originalHost = headers.get(HttpHeader.HOST);
+        if (originalHost != null && !headers.containsKey(HttpHeader.X_FORWARDED_HOST)) {
+            headers.put(HttpHeader.X_FORWARDED_HOST, originalHost);
+        }
+
+        headers.put(HttpHeader.X_FORWARDED_PROTO, "http");
+        headers.put(HttpHeader.X_FORWARDED_PORT, String.valueOf(client.localPort()));
     }
 
     private Cluster resolveRoute(HttpRequest request) {
@@ -111,7 +132,7 @@ public class UpstreamHandler implements AutoCloseable {
                 throw HttpException.gatewayTimeout(e);
             } catch (IOException e) {
                 throw HttpException.badGateway(
-                        "Failed to connect to backend " + this.currentServer.host() + ":" + this.currentServer.port(), e
+                        "Failed to connect to upstream server ", e
                 );
             }
         }

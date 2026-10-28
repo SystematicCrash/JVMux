@@ -46,6 +46,7 @@ public final class HttpHeader {
     public static final String X_FORWARDED_FOR = "x-forwarded-for";
     public static final String X_FORWARDED_HOST = "x-forwarded-host";
     public static final String X_FORWARDED_PROTO = "x-forwarded-proto";
+    public static final String X_FORWARDED_PORT = "x-forwarded-port";
     public static final String X_REAL_IP = "x-real-ip";
 
     public static final String LOCATION = "location";

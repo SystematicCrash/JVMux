@@ -1,3 +1,3 @@
-package com.jvmux.network.upstream;
+package com.jvmux.network.model;
 
 public record Server(String host, int port) {}
