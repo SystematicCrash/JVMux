@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.HashMap;
-import java.util.Map;
 
 public class UpstreamHandler implements AutoCloseable {
     private static final int MAX_ATTEMPTS = 2;
@@ -67,12 +66,23 @@ public class UpstreamHandler implements AutoCloseable {
     private HttpRequest prepareForUpstream(HttpRequest request, Server server) {
         var headers = new HashMap<>(request.headers());
 
-        String originalHost = headers.get(HttpHeader.HOST);
-        if (originalHost != null && !headers.containsKey(HttpHeader.X_FORWARDED_HOST)) {
+        var targetHost = (server.port() == 80 || server.port() == 443)
+                ? server.host()
+                : server.host() + ":" + server.port();
+        headers.put(HttpHeader.HOST, targetHost);
+
+        var forwardedFor = !request.hasHeader(HttpHeader.X_FORWARDED_FOR)
+                ? client.clientIp()
+                : request.getHeader(HttpHeader.X_FORWARDED_FOR) + ", " + client.clientIp();
+        headers.put(HttpHeader.X_FORWARDED_FOR, forwardedFor);
+
+        var originalHost = request.getHeader(HttpHeader.HOST);
+        if (originalHost != null && !request.hasHeader(HttpHeader.X_FORWARDED_HOST)) {
             headers.put(HttpHeader.X_FORWARDED_HOST, originalHost);
         }
 
-        prepareHeaders(headers, server);
+        headers.put(HttpHeader.X_FORWARDED_PROTO, "http");
+        headers.put(HttpHeader.X_FORWARDED_PORT, String.valueOf(client.localPort()));
 
         return HttpRequest.builder()
                 .method(request.method())
@@ -81,26 +91,6 @@ public class UpstreamHandler implements AutoCloseable {
                 .headers(headers)
                 .body(request.body())
                 .build();
-    }
-
-    private void prepareHeaders(Map<String, String> headers, Server server) {
-        var targetHost = (server.port() == 80 || server.port() == 443)
-                ? server.host()
-                : server.host() + ":" + server.port();
-        headers.put(HttpHeader.HOST, targetHost);
-
-        var forwardedFor = !headers.containsKey(HttpHeader.X_FORWARDED_FOR)
-                ? client.clientIp()
-                : headers.get(HttpHeader.X_FORWARDED_FOR) + ", " + client.clientIp();
-        headers.put(HttpHeader.X_FORWARDED_FOR, forwardedFor);
-
-        var originalHost = headers.get(HttpHeader.HOST);
-        if (originalHost != null && !headers.containsKey(HttpHeader.X_FORWARDED_HOST)) {
-            headers.put(HttpHeader.X_FORWARDED_HOST, originalHost);
-        }
-
-        headers.put(HttpHeader.X_FORWARDED_PROTO, "http");
-        headers.put(HttpHeader.X_FORWARDED_PORT, String.valueOf(client.localPort()));
     }
 
     private Cluster resolveRoute(HttpRequest request) {

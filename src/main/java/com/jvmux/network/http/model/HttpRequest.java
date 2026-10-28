@@ -22,6 +22,10 @@ public record HttpRequest(
         return this.headers.get(name);
     }
 
+    public boolean hasHeader(String name) {
+        return this.headers.containsKey(name);
+    }
+
     public Optional<BodyWriter> getWriter() {
         return BodyWriterFactory.create(this.body, this.headers);
     }

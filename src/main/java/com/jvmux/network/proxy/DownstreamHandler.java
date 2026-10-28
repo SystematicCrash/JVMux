@@ -21,20 +21,20 @@ public class DownstreamHandler implements AutoCloseable {
         );
     }
 
-    public HttpRequest readRequest() throws IOException {
+    public HttpRequest receive() throws IOException {
         try {
             return HttpServer.readRequest(pipe.in());
         } catch (Exception e) {
-            writeError(e);
+            forwardErr(e);
             return null;
         }
     }
 
-    public void writeResponse(HttpResponse response) throws IOException {
+    public void forward(HttpResponse response) throws IOException {
         HttpServer.writeResponse(response, pipe.out());
     }
 
-    public void writeError(Throwable error) throws IOException {
+    public void forwardErr(Throwable error) throws IOException {
         HttpServer.writeResponse(ErrorHandler.toResponse(error), pipe.out());
     }
 

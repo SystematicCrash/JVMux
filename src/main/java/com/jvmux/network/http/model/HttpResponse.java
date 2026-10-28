@@ -12,6 +12,9 @@ import lombok.Builder;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -28,6 +31,7 @@ public record HttpResponse(
         if (headers == null) {
             headers = new HashMap<>();
         }
+        this.applyDefaultFraming();
     }
 
     public static HttpResponse empty(int status) {
@@ -37,11 +41,15 @@ public record HttpResponse(
                 .build();
 
         res.setHeader(HttpHeader.CONTENT_LENGTH, "0");
-        return res.applyDefaultFraming();
+        return res;
     }
 
     public String getHeader(String name) {
         return this.headers.get(name);
+    }
+
+    public boolean hasHeader(String name) {
+        return this.headers.containsKey(name);
     }
 
     public void setHeader(String header, String value) {
@@ -78,7 +86,13 @@ public record HttpResponse(
     }
 
     private HttpResponse applyDefaultFraming() {
-        this.setHeader(HttpHeader.HOST, "JVMux");
+        setHeader(HttpHeader.HOST, "JVMux");
+
+        if (!hasHeader(HttpHeader.DATE)) {
+            var date = DateTimeFormatter.RFC_1123_DATE_TIME.format(ZonedDateTime.now(ZoneOffset.UTC));
+            setHeader(HttpHeader.DATE, date);
+        }
+
         return this;
     }
 }
