@@ -60,7 +60,13 @@ public class UpstreamHandler implements AutoCloseable {
     private HttpResponse sendAndReceive(HttpRequest request) throws IOException {
         request = prepareForUpstream(request, this.currentServer);
         HttpClient.writeRequest(request, pipe.out());
-        return HttpClient.readResponse(pipe.in());
+        var response = HttpClient.readResponse(pipe.in());
+
+        if (response == null) {
+            return null;
+        }
+
+        return prepareForDownstream(response, request);
     }
 
     private HttpRequest prepareForUpstream(HttpRequest request, Server server) {
@@ -92,6 +98,28 @@ public class UpstreamHandler implements AutoCloseable {
                 .headers(headers)
                 .body(request.getBody())
                 .build();
+    }
+
+    private HttpResponse prepareForDownstream(HttpResponse response, HttpRequest originalRequest) {
+        response.getHeaders().remove(HttpHeader.KEEP_ALIVE);
+        response.getHeaders().remove(HttpHeader.UPGRADE);
+        response.getHeaders().remove(HttpHeader.PROXY_AUTHENTICATE);
+        response.getHeaders().remove(HttpHeader.PROXY_AUTHORIZATION);
+        response.getHeaders().remove(HttpHeader.TRAILER);
+        response.getHeaders().remove(HttpHeader.TE);
+
+        String location = response.getHeader(HttpHeader.LOCATION);
+        if (location != null && currentServer != null) {
+            String internalPrefix = currentServer.host() + ":" + currentServer.port();
+            if (location.contains(internalPrefix)) {
+                String clientHost = originalRequest.getHeader(HttpHeader.HOST);
+                if (clientHost != null) {
+                    response.setHeader(HttpHeader.LOCATION, location.replace(internalPrefix, clientHost));
+                }
+            }
+        }
+
+        return response;
     }
 
     private Cluster resolveRoute(HttpRequest request) {

@@ -16,8 +16,8 @@ public class Application {
         while (!tcpServer.isClosed()) {
             var socket = tcpServer.accept();
             executor.submit(() -> {
-                try(var session = new ProxyRelay(socket, new Router().build())) {
-                    session.run();
+                try(var proxy = new ProxyRelay(socket, new Router().build())) {
+                    proxy.run();
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }

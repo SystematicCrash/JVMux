@@ -1,7 +1,6 @@
 package com.jvmux.network.http.constant;
 
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public final class Constants {
 
@@ -22,6 +21,8 @@ public final class Constants {
     public static final int MAX_HEADER_SIZE = 8 * 1024;
     public static final int MAX_REQUEST_LINE_LEN = 8 * 1024;
     public static final int READ_BUFFER_SIZE = 8 * 1024;
+    public static final int IDLE_TIMEOUT = com.jvmux.network.tcp.Constants.SERVER_IDLE_TIMEOUT;
+    public static final int MAX_REQUESTS = 200;
 
     // validation
     public static final Set<String> VALID_METHODS = Set.of(
