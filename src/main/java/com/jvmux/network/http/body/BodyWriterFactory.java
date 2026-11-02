@@ -1,29 +1,30 @@
-package com.jvmux.network.http.io;
+package com.jvmux.network.http.body;
 
 import com.jvmux.network.http.constant.HttpHeader;
 
 import java.io.InputStream;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 public final class BodyWriterFactory {
 
     private BodyWriterFactory() {}
 
-    public static BodyWriter create(InputStream body, Map<String, String> headers) {
+    public static Optional<BodyWriter> create(InputStream body, Map<String, String> headers) {
         if (headers == null) {
-            return null;
+            return Optional.empty();
         }
 
         if (isChunked(headers)) {
-            return new ChunkedBodyWriter(body);
+            return Optional.of(new ChunkedBodyWriter(body));
         }
 
         if (isFixedSize(headers)) {
-            return new FixedBodyWriter(body, getContentLength(headers));
+            return Optional.of(new FixedBodyWriter(body, getContentLength(headers)));
         }
 
-        return null;
+        return Optional.empty();
     }
 
     private static boolean isChunked(Map<String, String> headers) {

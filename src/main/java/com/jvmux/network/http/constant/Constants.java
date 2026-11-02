@@ -21,6 +21,8 @@ public final class Constants {
     public static final int MAX_HEADER_SIZE = 8 * 1024;
     public static final int MAX_REQUEST_LINE_LEN = 8 * 1024;
     public static final int READ_BUFFER_SIZE = 8 * 1024;
+    public static final int IDLE_TIMEOUT = com.jvmux.network.tcp.Constants.SERVER_IDLE_TIMEOUT;
+    public static final int MAX_REQUESTS = 5;
 
     // validation
     public static final Set<String> VALID_METHODS = Set.of(
@@ -43,9 +45,25 @@ public final class Constants {
     public static final Set<String> UNIQUE_HEADERS = Set.of(
             HttpHeader.HOST,
             HttpHeader.CONTENT_LENGTH,
-            HttpHeader.TRANSFER_ENCODING
+            HttpHeader.TRANSFER_ENCODING,
+            HttpHeader.CONTENT_TYPE,
+            HttpHeader.AUTHORIZATION,
+            HttpHeader.USER_AGENT,
+            HttpHeader.REFERER,
+            HttpHeader.DATE,
+            HttpHeader.LOCATION,
+            HttpHeader.ETAG,
+            HttpHeader.LAST_MODIFIED,
+            HttpHeader.RETRY_AFTER,
+            HttpHeader.SERVER
     );
-    public static final Set<String> MANDATORY_HEADERS = Set.of(
+
+    public static final Set<String> REQUEST_MANDATORY_HEADERS = Set.of(
             HttpHeader.HOST
+    );
+
+    public static final Set<String> PAYLOAD_SPECIFIER_HEADERS = Set.of(
+            HttpHeader.CONTENT_LENGTH,
+            HttpHeader.TRANSFER_ENCODING
     );
 }

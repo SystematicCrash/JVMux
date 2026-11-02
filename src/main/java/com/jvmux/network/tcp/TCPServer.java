@@ -1,42 +1,35 @@
 package com.jvmux.network.tcp;
 
-import lombok.AllArgsConstructor;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.function.BiFunction;
 
-@AllArgsConstructor
-public class TCPServer {
-    private final int port;
-    private final BiFunction<InputStream, OutputStream, Boolean> handler;
+import static com.jvmux.network.tcp.Constants.SERVER_IDLE_TIMEOUT;
+import static com.jvmux.network.tcp.Constants.TCP_NO_DELAY;
 
-    public void start() throws IOException {
-        try (var env = ServerEnvironment.open(this.port)) {
-            while (!env.serverSocket().isClosed()) {
-                var clientSocket = env.serverSocket().accept();
-                env.executor().submit(() -> this.handle(clientSocket));
-            }
-        }
+public class TCPServer implements AutoCloseable {
+
+    private final ServerSocket serverSocket;
+
+    public TCPServer(int port) throws IOException {
+        this.serverSocket = new ServerSocket(port);
     }
 
-    public void handle(Socket socket) {
-        try (socket) {
-            socket.setSoTimeout(3000);
-            socket.setTcpNoDelay(true);
+    public Socket accept() throws IOException {
+        var socket = this.serverSocket.accept();
 
-            var keepAlive = true;
+        socket.setSoTimeout(SERVER_IDLE_TIMEOUT);
+        socket.setTcpNoDelay(TCP_NO_DELAY);
 
-            while (!socket.isClosed() && keepAlive) {
-                keepAlive = this.handler.apply(
-                        socket.getInputStream(),
-                        socket.getOutputStream()
-                );
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return socket;
     }
 
+    public boolean isClosed() {
+        return this.serverSocket.isClosed();
+    }
+
+    @Override
+    public void close() throws IOException {
+        this.serverSocket.close();
+    }
 }

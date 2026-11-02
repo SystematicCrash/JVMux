@@ -1,53 +1,81 @@
 package com.jvmux.network.http.model;
 
-import com.jvmux.network.http.body.BodyEncoder;
-import com.jvmux.network.http.body.HtmlEncoder;
-import com.jvmux.network.http.body.JsonEncoder;
-import com.jvmux.network.http.body.PlainTextEncoder;
-import com.jvmux.network.http.io.BodyWriter;
-import com.jvmux.network.http.io.BodyWriterFactory;
+import com.jvmux.network.http.body.BodyWriter;
+import com.jvmux.network.http.body.BodyWriterFactory;
+import com.jvmux.network.http.codec.format.HeaderFormatter;
+import com.jvmux.network.http.codec.payload.HtmlEncoder;
+import com.jvmux.network.http.codec.payload.JsonEncoder;
+import com.jvmux.network.http.codec.payload.PayloadEncoder;
+import com.jvmux.network.http.codec.payload.PlainTextEncoder;
 import com.jvmux.network.http.constant.HttpHeader;
 import com.jvmux.network.http.constant.HttpVersion;
 import lombok.Builder;
+import lombok.Getter;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
-@Builder
-public record HttpResponse(
-        int status,
-        HttpVersion version,
-        Map<String, String> headers,
-        InputStream body
-) {
+@Getter
+public class HttpResponse {
 
-    public HttpResponse {
-        if (headers == null) {
-            headers = new HashMap<>();
-        }
+    private final int status;
+    private final HttpVersion version;
+    private final Map<String, String> headers;
+    private final InputStream body;
+
+    @Builder
+    public HttpResponse(int status, HttpVersion version, Map<String, String> headers, InputStream body) {
+        this.status = status;
+        this.version = version != null ? version : HttpVersion.HTTP_1_1;
+        this.headers = new HashMap<>(headers);
+        this.body = body != null ? body : InputStream.nullInputStream();
+        this.applyDefaultFraming();
     }
 
     public static HttpResponse empty(int status) {
-        var res = builder()
+        HttpResponse res = builder()
                 .version(HttpVersion.HTTP_1_1)
                 .status(status)
+                .headers(new HashMap<>())
                 .build();
 
         res.setHeader(HttpHeader.CONTENT_LENGTH, "0");
-        return res.applyDefaultFraming();
+        return res;
     }
 
     public String getHeader(String name) {
         return this.headers.get(name);
     }
 
-    public void setHeader(String header, String value) {
-        this.headers.put(header, value);
+    public boolean hasHeader(String name) {
+        return this.headers.containsKey(name);
     }
 
-    public BodyWriter getWriter() {
+    public void setHeader(String name, String value) {
+        this.headers.put(name, value);
+    }
+
+    public HttpResponse setAsLast() {
+        setHeader(HttpHeader.CONNECTION, "close");
+        return this;
+    }
+
+    public boolean isCloseConnection() {
+        String connection = getHeader(HttpHeader.CONNECTION);
+        if (connection == null) {
+            return this.version == HttpVersion.HTTP_1_0;
+        }
+        return "close".equalsIgnoreCase(connection);
+    }
+
+    public boolean isKeepAlive() {
+        return !isCloseConnection();
+    }
+
+    public Optional<BodyWriter> getWriter() {
         return BodyWriterFactory.create(this.body, this.headers);
     }
 
@@ -63,21 +91,28 @@ public record HttpResponse(
         return from(status, content, new JsonEncoder());
     }
 
-    private static HttpResponse from(int status, Object content, BodyEncoder encoder) {
+    private static HttpResponse from(int status, Object content, PayloadEncoder encoder) {
         byte[] bytes = encoder.encode(content);
-        var res = builder()
+        HttpResponse res = builder()
                 .version(HttpVersion.HTTP_1_1)
                 .status(status)
+                .headers(new HashMap<>())
                 .body(new ByteArrayInputStream(bytes))
                 .build();
 
         res.setHeader(HttpHeader.CONTENT_LENGTH, String.valueOf(bytes.length));
         res.setHeader(HttpHeader.CONTENT_TYPE, encoder.contentType());
-        return res.applyDefaultFraming();
+        return res;
     }
 
-    private HttpResponse applyDefaultFraming() {
-        this.setHeader(HttpHeader.HOST, "JVMux");
-        return this;
+    private void applyDefaultFraming() {
+        setHeader(HttpHeader.SERVER, "JVMux");
+        setHeader(HttpHeader.CONNECTION, "keep-alive");
+
+        if (!hasHeader(HttpHeader.DATE))
+            setHeader(HttpHeader.DATE, HeaderFormatter.formatDate());
+
+        setHeader(HttpHeader.KEEP_ALIVE, HeaderFormatter.formatKeepAlive());
+        setHeader(HttpHeader.VIA, HeaderFormatter.formatVia(getHeader(HttpHeader.VIA)));
     }
 }

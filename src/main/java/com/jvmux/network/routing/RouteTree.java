@@ -44,11 +44,11 @@ public class RouteTree {
 
             for (HttpMethod method : route.methods()) {
                 if (method == HttpMethod.ANY) {
-                    node.handlers.clear();
-                    node.handlers.put(method, route.handler());
+                    node.clusters.clear();
+                    node.clusters.put(method, route.cluster());
                     break;
                 }
-                node.handlers.put(method, route.handler());
+                node.clusters.put(method, route.cluster());
             }
         }
         return this;
