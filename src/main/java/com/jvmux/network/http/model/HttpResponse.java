@@ -2,11 +2,11 @@ package com.jvmux.network.http.model;
 
 import com.jvmux.network.http.body.BodyWriter;
 import com.jvmux.network.http.body.BodyWriterFactory;
+import com.jvmux.network.http.codec.format.HeaderFormatter;
 import com.jvmux.network.http.codec.payload.HtmlEncoder;
 import com.jvmux.network.http.codec.payload.JsonEncoder;
 import com.jvmux.network.http.codec.payload.PayloadEncoder;
 import com.jvmux.network.http.codec.payload.PlainTextEncoder;
-import com.jvmux.network.http.constant.Constants;
 import com.jvmux.network.http.constant.HttpHeader;
 import com.jvmux.network.http.constant.HttpVersion;
 import lombok.Builder;
@@ -14,9 +14,6 @@ import lombok.Getter;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -110,24 +107,12 @@ public class HttpResponse {
 
     private void applyDefaultFraming() {
         setHeader(HttpHeader.SERVER, "JVMux");
+        setHeader(HttpHeader.CONNECTION, "keep-alive");
 
-        if (!hasHeader(HttpHeader.DATE)) {
-            setHeader(
-                    HttpHeader.DATE,
-                    DateTimeFormatter.RFC_1123_DATE_TIME.format(ZonedDateTime.now(ZoneOffset.UTC))
-            );
-        }
+        if (!hasHeader(HttpHeader.DATE))
+            setHeader(HttpHeader.DATE, HeaderFormatter.formatDate());
 
-        setHeader(
-                HttpHeader.KEEP_ALIVE,
-                "timeout=" + Constants.IDLE_TIMEOUT + ", max=" + Constants.MAX_REQUESTS
-        );
-
-        String existingVia = getHeader(HttpHeader.VIA);
-        String jvmuxVia = HttpVersion.HTTP_1_1.value() + " JVMux";
-        setHeader(HttpHeader.VIA, (existingVia == null || existingVia.isBlank())
-                ? jvmuxVia
-                : existingVia + ", " + jvmuxVia);
-
+        setHeader(HttpHeader.KEEP_ALIVE, HeaderFormatter.formatKeepAlive());
+        setHeader(HttpHeader.VIA, HeaderFormatter.formatVia(getHeader(HttpHeader.VIA)));
     }
 }

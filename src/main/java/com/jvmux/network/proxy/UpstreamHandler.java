@@ -11,11 +11,9 @@ import com.jvmux.network.tcp.TCPClient;
 import com.jvmux.network.model.Client;
 import com.jvmux.network.model.Cluster;
 import com.jvmux.network.model.Server;
-
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
-import java.util.HashMap;
 
 public class UpstreamHandler implements AutoCloseable {
     private static final int MAX_ATTEMPTS = 2;
@@ -58,68 +56,20 @@ public class UpstreamHandler implements AutoCloseable {
     }
 
     private HttpResponse sendAndReceive(HttpRequest request) throws IOException {
-        request = prepareForUpstream(request, this.currentServer);
+        request = HttpTransformer.prepareForUpstream(request, this.currentServer, this.client);
         HttpClient.writeRequest(request, pipe.out());
+
         var response = HttpClient.readResponse(pipe.in());
 
         if (response == null) {
             return null;
         }
 
-        return prepareForDownstream(response, request);
-    }
-
-    private HttpRequest prepareForUpstream(HttpRequest request, Server server) {
-        var headers = new HashMap<>(request.getHeaders());
-
-        var targetHost = (server.port() == 80 || server.port() == 443)
-                ? server.host()
-                : server.host() + ":" + server.port();
-        headers.put(HttpHeader.HOST, targetHost);
-
-        var forwardedFor = !request.hasHeader(HttpHeader.X_FORWARDED_FOR)
-                ? client.clientIp()
-                : request.getHeader(HttpHeader.X_FORWARDED_FOR) + ", " + client.clientIp();
-        headers.put(HttpHeader.X_FORWARDED_FOR, forwardedFor);
-
-        var originalHost = request.getHeader(HttpHeader.HOST);
-        if (originalHost != null && !request.hasHeader(HttpHeader.X_FORWARDED_HOST)) {
-            headers.put(HttpHeader.X_FORWARDED_HOST, originalHost);
-        }
-
-        headers.put(HttpHeader.CONNECTION, "keep-alive");
-        headers.put(HttpHeader.X_FORWARDED_PROTO, "http");
-        headers.put(HttpHeader.X_FORWARDED_PORT, String.valueOf(client.localPort()));
-
-        return HttpRequest.builder()
-                .method(request.getMethod())
-                .path(request.getPath())
-                .version(request.getVersion())
-                .headers(headers)
-                .body(request.getBody())
-                .build();
-    }
-
-    private HttpResponse prepareForDownstream(HttpResponse response, HttpRequest originalRequest) {
-        response.getHeaders().remove(HttpHeader.KEEP_ALIVE);
-        response.getHeaders().remove(HttpHeader.UPGRADE);
-        response.getHeaders().remove(HttpHeader.PROXY_AUTHENTICATE);
-        response.getHeaders().remove(HttpHeader.PROXY_AUTHORIZATION);
-        response.getHeaders().remove(HttpHeader.TRAILER);
-        response.getHeaders().remove(HttpHeader.TE);
-
-        String location = response.getHeader(HttpHeader.LOCATION);
-        if (location != null && currentServer != null) {
-            String internalPrefix = currentServer.host() + ":" + currentServer.port();
-            if (location.contains(internalPrefix)) {
-                String clientHost = originalRequest.getHeader(HttpHeader.HOST);
-                if (clientHost != null) {
-                    response.setHeader(HttpHeader.LOCATION, location.replace(internalPrefix, clientHost));
-                }
-            }
-        }
-
-        return response;
+        return HttpTransformer.prepareForDownstream(
+                response,
+                request.getHeader(HttpHeader.HOST),
+                this.currentServer.url()
+        );
     }
 
     private Cluster resolveRoute(HttpRequest request) {
