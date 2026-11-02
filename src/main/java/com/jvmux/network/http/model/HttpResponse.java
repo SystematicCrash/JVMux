@@ -122,5 +122,12 @@ public class HttpResponse {
                 HttpHeader.KEEP_ALIVE,
                 "timeout=" + Constants.IDLE_TIMEOUT + ", max=" + Constants.MAX_REQUESTS
         );
+
+        String existingVia = getHeader(HttpHeader.VIA);
+        String jvmuxVia = HttpVersion.HTTP_1_1.value() + " JVMux";
+        setHeader(HttpHeader.VIA, (existingVia == null || existingVia.isBlank())
+                ? jvmuxVia
+                : existingVia + ", " + jvmuxVia);
+
     }
 }
