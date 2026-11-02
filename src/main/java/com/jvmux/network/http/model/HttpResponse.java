@@ -6,6 +6,7 @@ import com.jvmux.network.http.codec.payload.HtmlEncoder;
 import com.jvmux.network.http.codec.payload.JsonEncoder;
 import com.jvmux.network.http.codec.payload.PayloadEncoder;
 import com.jvmux.network.http.codec.payload.PlainTextEncoder;
+import com.jvmux.network.http.constant.Constants;
 import com.jvmux.network.http.constant.HttpHeader;
 import com.jvmux.network.http.constant.HttpVersion;
 import lombok.Builder;
@@ -108,9 +109,7 @@ public class HttpResponse {
     }
 
     private void applyDefaultFraming() {
-        if (!hasHeader(HttpHeader.SERVER)) {
-            setHeader(HttpHeader.SERVER, "JVMux");
-        }
+        setHeader(HttpHeader.SERVER, "JVMux");
 
         if (!hasHeader(HttpHeader.DATE)) {
             setHeader(
@@ -118,5 +117,10 @@ public class HttpResponse {
                     DateTimeFormatter.RFC_1123_DATE_TIME.format(ZonedDateTime.now(ZoneOffset.UTC))
             );
         }
+
+        setHeader(
+                HttpHeader.KEEP_ALIVE,
+                "timeout=" + Constants.IDLE_TIMEOUT + ", max=" + Constants.MAX_REQUESTS
+        );
     }
 }
