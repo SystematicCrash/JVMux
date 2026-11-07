@@ -6,22 +6,10 @@ import com.jvmux.network.model.Server;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class RandomBalancer implements LoadBalancer {
+public class RandomBalancer extends AbstractLoadBalancer {
 
     @Override
-    public Server select(Cluster cluster) {
-        List<Server> healthy = cluster.servers().stream()
-                .filter(Server::isHealthy)
-                .toList();
-
-        if (healthy.isEmpty()) {
-            throw new IllegalStateException("No healthy servers available in cluster: " + cluster.name());
-        }
-
-        if (healthy.size() == 1) {
-            return healthy.getFirst();
-        }
-
+    protected Server selectFrom(Cluster cluster, List<Server> healthy) {
         int index = ThreadLocalRandom.current().nextInt(healthy.size());
         return healthy.get(index);
     }

@@ -7,25 +7,12 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class WeightedRoundRobinBalancer implements LoadBalancer {
+public class WeightedRoundRobinBalancer extends AbstractLoadBalancer {
 
     private final ConcurrentHashMap<String, AtomicInteger> currentWeights = new ConcurrentHashMap<>();
 
     @Override
-    public Server select(Cluster cluster) {
-        List<Server> healthy = cluster.servers().stream()
-                .filter(Server::isHealthy)
-                .toList();
-
-        if (healthy.isEmpty()) {
-            throw new IllegalStateException("No healthy servers in cluster: " + cluster.name());
-        }
-
-        int size = healthy.size();
-        if (size == 1) {
-            return healthy.getFirst();
-        }
-
+    protected Server selectFrom(Cluster cluster, List<Server> healthy) {
         int totalWeight = 0;
         Server best = null;
         int maxWeight = Integer.MIN_VALUE;
