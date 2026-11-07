@@ -18,7 +18,8 @@ public class WeightedRandomBalancer implements LoadBalancer {
             throw new IllegalStateException("No healthy servers in cluster: " + cluster.name());
         }
 
-        if (healthy.size() == 1) {
+        var size = healthy.size();
+        if (size == 1) {
             return healthy.getFirst();
         }
 
@@ -33,6 +34,6 @@ public class WeightedRandomBalancer implements LoadBalancer {
             }
         }
 
-        return healthy.get(ThreadLocalRandom.current().nextInt(healthy.size()));
+        return healthy.get(ThreadLocalRandom.current().nextInt(size));
     }
 }

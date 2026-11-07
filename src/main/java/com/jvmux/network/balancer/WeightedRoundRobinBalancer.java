@@ -21,6 +21,11 @@ public class WeightedRoundRobinBalancer implements LoadBalancer {
             throw new IllegalStateException("No healthy servers in cluster: " + cluster.name());
         }
 
+        int size = healthy.size();
+        if (size == 1) {
+            return healthy.getFirst();
+        }
+
         int totalWeight = 0;
         Server best = null;
         int maxWeight = Integer.MIN_VALUE;
