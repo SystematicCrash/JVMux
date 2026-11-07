@@ -111,8 +111,6 @@ public class UpstreamHandler implements AutoCloseable {
             try {
                 this.upstreamSocket.close();
             } catch (IOException ignored) {}
-            this.upstreamSocket = null;
-            this.pipe = null;
         }
     }
 }
