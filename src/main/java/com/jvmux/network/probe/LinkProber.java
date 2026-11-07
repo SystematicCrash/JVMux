@@ -11,7 +11,10 @@ public class LinkProber {
     public static long tcpRTT(Server server, int timeoutMs) {
         long start = System.nanoTime();
         try (Socket socket = new Socket()) {
-            socket.connect(new InetSocketAddress(server.host(), server.port()), timeoutMs);
+            socket.connect(new InetSocketAddress(
+                    server.getHost(),
+                    server.getPort()
+            ), timeoutMs);
             return (System.nanoTime() - start) / 1_000_000;
         } catch (IOException e) {
             return -1;
