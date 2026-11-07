@@ -34,18 +34,11 @@ public class ProxyRelay implements Runnable, AutoCloseable {
 
             try {
                 HttpResponse response = upstream.forward(request);
-
-                boolean clientClose = request.isCloseConnection();
-
-                if (clientClose) {
-                    response.setAsLast();
-                }
                 downstream.forward(response);
 
                 boolean upstreamClose = response.isCloseConnection();
 
                 if (upstreamClose) upstream.close();
-                if (clientClose) break;
 
             } catch (Exception e) {
                 downstream.forwardErr(e);

@@ -13,6 +13,7 @@ public class DownstreamHandler implements AutoCloseable {
     private final Socket clientSocket;
     private final StreamPair pipe;
     private int requestCount = 0;
+    private boolean wannaClose = false;
 
     public DownstreamHandler(Socket clientSocket) throws IOException {
         this.clientSocket = clientSocket;
@@ -22,7 +23,10 @@ public class DownstreamHandler implements AutoCloseable {
     public HttpRequest receive() throws IOException {
         try {
             var request = HttpServer.readRequest(pipe.in());
-            requestCount++;
+            if (request != null) {
+                requestCount++;
+                wannaClose = request.isCloseConnection();
+            }
             return request;
         } catch (Exception e) {
             forwardErr(e);
@@ -31,14 +35,18 @@ public class DownstreamHandler implements AutoCloseable {
     }
 
     public void forward(HttpResponse response) throws IOException {
-        if (requestCount == Constants.MAX_REQUESTS)
-            HttpServer.writeResponse(response.setAsLast(), pipe.out());
-        else
-            HttpServer.writeResponse(response, pipe.out());
+        boolean last = wannaClose || requestCount == Constants.MAX_REQUESTS;
+
+        if (last)
+            response.setAsLast();
+
+        HttpServer.writeResponse(response, pipe.out());
+
+        if (last) close();
     }
 
     public void forwardErr(Throwable error) throws IOException {
-        HttpServer.writeResponse(ErrorHandler.toResponse(error), pipe.out());
+        forward(ErrorHandler.toResponse(error));
     }
 
     public boolean isConnected() {
