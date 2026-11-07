@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Server {
     private AtomicInteger activeConns;
     private volatile boolean healthy;
-    private final byte weigth;
+    private final byte weight;
     private final String host;
     private final String url;
     private final int port;
@@ -18,7 +18,7 @@ public class Server {
             throw new IllegalArgumentException("Server weight can only be between 1 and 10");
         }
 
-        this.weigth = weight;
+        this.weight = weight;
         this.host = host;
         this.port = port;
         this.url = (port == 80 || port == 443)

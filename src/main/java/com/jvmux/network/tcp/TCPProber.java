@@ -1,4 +1,4 @@
-package com.jvmux.network.probe;
+package com.jvmux.network.tcp;
 
 import com.jvmux.network.model.Server;
 
@@ -6,9 +6,9 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
-public class LinkProber {
+public class TCPProber {
 
-    public static long tcpRTT(Server server, int timeoutMs) {
+    public static long measureRTT(Server server, int timeoutMs) {
         long start = System.nanoTime();
         try (Socket socket = new Socket()) {
             socket.connect(new InetSocketAddress(

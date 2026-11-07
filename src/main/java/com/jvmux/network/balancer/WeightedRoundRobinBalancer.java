@@ -26,13 +26,13 @@ public class WeightedRoundRobinBalancer implements LoadBalancer {
         int maxWeight = Integer.MIN_VALUE;
 
         for (Server server : healthy) {
-            totalWeight += server.getWeigth();
+            totalWeight += server.getWeight();
 
             String key = cluster.name() + ":" + server.getUrl();
             AtomicInteger cur = currentWeights
                     .computeIfAbsent(key, k -> new AtomicInteger(0));
 
-            int updatedWeight = cur.addAndGet(server.getWeigth());
+            int updatedWeight = cur.addAndGet(server.getWeight());
 
             if (updatedWeight > maxWeight) {
                 maxWeight = updatedWeight;
