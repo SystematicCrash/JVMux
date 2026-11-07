@@ -25,31 +25,25 @@ public class ProxyRelay implements Runnable, AutoCloseable {
         } catch (Exception ignored) {}
     }
 
-    private void connectionLoop() throws IOException {
+    private void connectionLoop() {
         while (downstream.isConnected()) {
             HttpRequest request = downstream.receive();
+
             if (request == null) {
                 break;
             }
 
-            try {
-                HttpResponse response = upstream.forward(request);
-                downstream.forward(response);
+            HttpResponse response = upstream.forward(request);
+            downstream.forward(response);
 
-                boolean upstreamClose = response.isCloseConnection();
-
-                if (upstreamClose) upstream.close();
-
-            } catch (Exception e) {
-                downstream.forwardErr(e);
+            if (response.isCloseConnection()) {
                 upstream.close();
-                break;
             }
         }
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         try {
             upstream.close();
         } finally {
