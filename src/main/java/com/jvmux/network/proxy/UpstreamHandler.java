@@ -68,7 +68,7 @@ public class UpstreamHandler implements AutoCloseable {
         return HttpTransformer.prepareForDownstream(
                 response,
                 request.getHeader(HttpHeader.HOST),
-                this.currentServer.url()
+                this.currentServer.getUrl()
         );
     }
 

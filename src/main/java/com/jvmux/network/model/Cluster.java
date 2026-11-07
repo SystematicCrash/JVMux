@@ -7,6 +7,6 @@ public record Cluster(
         Set<Server> servers
 ) {
     public Server getRandomServer() {
-        return new Server("localhost", 1234);
+        return new Server("localhost", 1234, 5);
     }
 }

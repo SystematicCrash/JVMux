@@ -14,7 +14,7 @@ public class HttpTransformer {
     public static HttpRequest prepareForUpstream(HttpRequest request, Server server, Client client) {
         var headers = new HashMap<>(request.getHeaders());
 
-        headers.put(HttpHeader.HOST, server.url());
+        headers.put(HttpHeader.HOST, server.getUrl());
         headers.put(HttpHeader.X_FORWARDED_FOR, HeaderFormatter.formatForwardedFor(
                 request.getHeader(HttpHeader.X_FORWARDED_FOR),
                 client.clientIp()
