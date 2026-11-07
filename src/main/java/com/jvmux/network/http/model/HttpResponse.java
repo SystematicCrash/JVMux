@@ -107,7 +107,9 @@ public class HttpResponse {
 
     private void applyDefaultFraming() {
         setHeader(HttpHeader.SERVER, "JVMux");
-        setHeader(HttpHeader.CONNECTION, "keep-alive");
+
+        if (!hasHeader(HttpHeader.CONNECTION))
+            setHeader(HttpHeader.CONNECTION, "keep-alive");
 
         if (!hasHeader(HttpHeader.DATE))
             setHeader(HttpHeader.DATE, HeaderFormatter.formatDate());
