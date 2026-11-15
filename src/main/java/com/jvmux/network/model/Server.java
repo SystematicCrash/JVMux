@@ -30,6 +30,10 @@ public class Server {
                 : host + ":" + port;
     }
 
+    public int getActiveConns() {
+        return this.activeConns.get();
+    }
+
     public void incConns() {
         this.activeConns.incrementAndGet();
     }

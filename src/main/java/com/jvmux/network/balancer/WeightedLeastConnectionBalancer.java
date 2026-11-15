@@ -12,7 +12,7 @@ public class WeightedLeastConnectionBalancer extends AbstractLoadBalancer {
     protected Server selectFrom(Cluster cluster, List<Server> healthy) {
         return healthy.stream()
                 .min(Comparator.comparingDouble(s ->
-                        (double) s.getActiveConns().get() / Math.max(1, s.getWeight())
+                        (double) s.getActiveConns() / Math.max(1, s.getWeight())
                 ))
                 .orElse(healthy.getFirst());
     }

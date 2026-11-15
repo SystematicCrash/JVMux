@@ -13,7 +13,7 @@ public class LeastConnectionBalancer extends AbstractLoadBalancer {
         int leastConnections = 0;
 
         for (Server server : healthy) {
-            if (server.getActiveConns().get() < leastConnections)
+            if (server.getActiveConns() < leastConnections)
                 best = server;
         }
 
