@@ -1,6 +1,8 @@
-package com.jvmux.network.balancer;
+package com.jvmux.network.balancer.hash;
 
 import com.jvmux.common.util.XxHasher;
+import com.jvmux.network.balancer.AbstractLoadBalancer;
+import com.jvmux.network.balancer.SelectionContext;
 import com.jvmux.network.model.Cluster;
 import com.jvmux.network.model.Server;
 

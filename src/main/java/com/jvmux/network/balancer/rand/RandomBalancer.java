@@ -1,5 +1,6 @@
-package com.jvmux.network.balancer;
+package com.jvmux.network.balancer.rand;
 
+import com.jvmux.network.balancer.AbstractLoadBalancer;
 import com.jvmux.network.model.Cluster;
 import com.jvmux.network.model.Server;
 
