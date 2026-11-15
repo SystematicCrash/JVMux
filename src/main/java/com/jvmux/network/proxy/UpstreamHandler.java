@@ -59,11 +59,15 @@ public class UpstreamHandler implements AutoCloseable {
         request = HttpTransformer.prepareForUpstream(request, this.currentServer, this.client);
         HttpClient.writeRequest(request, pipe.out());
 
+        long start = System.nanoTime();
         var response = HttpClient.readResponse(pipe.in());
+        long responseTimeNanos = System.nanoTime() - start;
 
         if (response == null) {
             return null;
         }
+
+        this.currentServer.recordResponseTime(responseTimeNanos);
 
         return HttpTransformer.prepareForDownstream(
                 response,

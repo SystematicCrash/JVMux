@@ -3,10 +3,14 @@ package com.jvmux.network.model;
 import lombok.Getter;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Getter
 public class Server {
+    private static final double EWMA_ALPHA = 0.2;
+
     private AtomicInteger activeConns;
+    private final AtomicLong responseTimeEwmaNanos = new AtomicLong(0);
     private volatile boolean healthy;
     private final byte weight;
     private final String host;
@@ -32,5 +36,12 @@ public class Server {
 
     public void decConns() {
         this.activeConns.decrementAndGet();
+    }
+
+    public void recordResponseTime(long responseTimeNanos) {
+        this.responseTimeEwmaNanos.updateAndGet(prev ->
+                prev == 0
+                        ? responseTimeNanos
+                        : (long) (EWMA_ALPHA * responseTimeNanos + (1 - EWMA_ALPHA) * prev));
     }
 }
