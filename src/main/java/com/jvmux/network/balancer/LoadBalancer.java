@@ -5,5 +5,9 @@ import com.jvmux.network.model.Server;
 
 public interface LoadBalancer {
 
-    Server select(Cluster cluster);
+    Server select(Cluster cluster, SelectionContext context);
+
+    default Server select(Cluster cluster) {
+        return select(cluster, SelectionContext.empty());
+    }
 }
