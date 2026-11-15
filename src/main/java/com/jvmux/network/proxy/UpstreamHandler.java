@@ -98,6 +98,7 @@ public class UpstreamHandler implements AutoCloseable {
                         this.currentServer.getHost(),
                         this.currentServer.getPort()
                 );
+                this.currentServer.incConns();
                 this.pipe = StreamPair.from(this.upstreamSocket);
             } catch (SocketTimeoutException e) {
                 throw HttpException.gatewayTimeout(e);
@@ -111,10 +112,13 @@ public class UpstreamHandler implements AutoCloseable {
 
     @Override
     public void close() {
-        if (this.upstreamSocket != null) {
+        if (this.upstreamSocket != null && !this.upstreamSocket.isClosed()) {
             try {
                 this.upstreamSocket.close();
-            } catch (IOException ignored) {}
+            } catch (IOException ignored) {
+            } finally {
+                this.currentServer.decConns();
+            }
         }
     }
 }

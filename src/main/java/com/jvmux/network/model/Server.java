@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class Server {
     private static final double EWMA_ALPHA = 0.2;
 
-    private AtomicInteger activeConns;
+    private final AtomicInteger activeConns = new AtomicInteger(0);
     private final AtomicLong responseTimeEwmaNanos = new AtomicLong(0);
     private volatile boolean healthy;
     private final byte weight;
