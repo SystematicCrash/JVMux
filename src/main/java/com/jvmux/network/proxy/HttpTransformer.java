@@ -1,6 +1,6 @@
 package com.jvmux.network.proxy;
 
-import com.jvmux.network.http.codec.format.HeaderFormatter;
+import com.jvmux.network.http.codec.encode.HeaderEncoder;
 import com.jvmux.network.http.constant.HttpHeader;
 import com.jvmux.network.http.model.HttpRequest;
 import com.jvmux.network.http.model.HttpResponse;
@@ -15,7 +15,7 @@ public class HttpTransformer {
         var headers = new HashMap<>(request.getHeaders());
 
         headers.put(HttpHeader.HOST, server.getUrl());
-        headers.put(HttpHeader.X_FORWARDED_FOR, HeaderFormatter.formatForwardedFor(
+        headers.put(HttpHeader.X_FORWARDED_FOR, HeaderEncoder.formatForwardedFor(
                 request.getHeader(HttpHeader.X_FORWARDED_FOR),
                 client.clientIp()
         ));
@@ -45,7 +45,7 @@ public class HttpTransformer {
         response.getHeaders().remove(HttpHeader.TRAILER);
         response.getHeaders().remove(HttpHeader.TE);
 
-        HeaderFormatter.formatLocation(
+        HeaderEncoder.formatLocation(
                 response.getHeader(HttpHeader.LOCATION),
                 upstreamUrl,
                 requestHost

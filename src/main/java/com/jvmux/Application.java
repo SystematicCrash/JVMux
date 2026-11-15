@@ -5,7 +5,7 @@ import com.jvmux.network.proxy.ProxyRelay;
 import com.jvmux.network.tcp.TCPServer;
 
 import java.util.concurrent.Executors;
-
+// TODO: Move bootstrapping into separate method or class
 public class Application {
     public static void main(String[] args) throws Exception {
         System.out.println("Application is up and running...");

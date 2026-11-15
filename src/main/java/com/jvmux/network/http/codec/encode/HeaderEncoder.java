@@ -1,4 +1,4 @@
-package com.jvmux.network.http.codec.format;
+package com.jvmux.network.http.codec.encode;
 
 import com.jvmux.network.http.constant.Constants;
 import com.jvmux.network.http.constant.HttpVersion;
@@ -8,7 +8,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
-public class HeaderFormatter {
+public class HeaderEncoder {
 
     public static Optional<String> formatLocation(String location, String oldDomain, String newDomain) {
         if (location == null || oldDomain == null || newDomain == null)
