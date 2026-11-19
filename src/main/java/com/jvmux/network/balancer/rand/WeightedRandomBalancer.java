@@ -17,7 +17,7 @@ public class WeightedRandomBalancer extends AbstractLoadBalancer {
 
         for (Server server : healthy) {
             cursor += server.getWeight();
-            if (cursor >= random) {
+            if (cursor > random) {
                 return server;
             }
         }

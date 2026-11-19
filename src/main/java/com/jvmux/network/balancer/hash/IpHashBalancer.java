@@ -17,7 +17,7 @@ public class IpHashBalancer extends AbstractLoadBalancer {
                 .sorted(Comparator.comparing(Server::getHost).thenComparingInt(Server::getPort))
                 .toList();
 
-        if (context == null) {
+        if (context == null || context.clientIp() == null) {
             throw new IllegalArgumentException("ClientIp cannot be null");
         }
 
