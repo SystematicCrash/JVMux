@@ -30,6 +30,15 @@ public class Server {
                 : host + ":" + port;
     }
 
+    public Server(String host, int port, byte weight, boolean healthy) {
+        this(host, port, weight);
+        this.healthy = healthy;
+    }
+
+    public void setHealthy(boolean healthy) {
+        this.healthy = healthy;
+    }
+
     public int getActiveConns() {
         return this.activeConns.get();
     }

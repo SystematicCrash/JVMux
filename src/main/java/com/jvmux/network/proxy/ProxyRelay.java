@@ -1,5 +1,7 @@
 package com.jvmux.network.proxy;
 
+import com.jvmux.network.balancer.BalancingStrategy;
+import com.jvmux.network.balancer.LoadBalancer;
 import com.jvmux.network.http.model.HttpRequest;
 import com.jvmux.network.http.model.HttpResponse;
 import com.jvmux.network.model.Client;
@@ -16,6 +18,16 @@ public class ProxyRelay implements Runnable, AutoCloseable {
     public ProxyRelay(Socket clientSocket, RouteTree routeTree) throws IOException {
         this.downstream = new DownstreamHandler(clientSocket);
         this.upstream = new UpstreamHandler(routeTree, Client.from(clientSocket));
+    }
+
+    public ProxyRelay(Socket clientSocket, RouteTree routeTree, LoadBalancer loadBalancer) throws IOException {
+        this.downstream = new DownstreamHandler(clientSocket);
+        this.upstream = new UpstreamHandler(routeTree, Client.from(clientSocket), loadBalancer);
+    }
+
+    public ProxyRelay(Socket clientSocket, RouteTree routeTree, BalancingStrategy strategy) throws IOException {
+        this.downstream = new DownstreamHandler(clientSocket);
+        this.upstream = new UpstreamHandler(routeTree, Client.from(clientSocket), strategy);
     }
 
     @Override

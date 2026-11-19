@@ -10,12 +10,15 @@ public class LeastConnectionBalancer extends AbstractLoadBalancer {
 
     @Override
     protected Server selectFrom(Cluster cluster, List<Server> healthy) {
-        Server best = null;
-        int leastConnections = 0;
+        Server best = healthy.getFirst();
+        int leastConnections = best.getActiveConns();
 
         for (Server server : healthy) {
-            if (server.getActiveConns() < leastConnections)
+            int conns = server.getActiveConns();
+            if (conns < leastConnections) {
                 best = server;
+                leastConnections = conns;
+            }
         }
 
         return best;
