@@ -35,7 +35,7 @@ public class DownstreamHandler implements AutoCloseable {
     }
 
     public void forward(HttpResponse response) {
-        boolean last = wannaClose || requestCount == Constants.MAX_REQUESTS;
+        boolean last = wannaClose || requestCount == Constants.MAX_REQUESTS || response.isCloseConnection();
 
         if (last) response.setAsLast();
 
@@ -49,7 +49,9 @@ public class DownstreamHandler implements AutoCloseable {
     }
 
     public void forwardErr(Throwable error) {
-        forward(ErrorHandler.toResponse(error));
+        var response = ErrorHandler.toResponse(error);
+        response.setAsLast();
+        forward(response);
     }
 
     public boolean isConnected() {
