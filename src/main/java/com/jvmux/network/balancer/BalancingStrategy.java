@@ -1,0 +1,15 @@
+package com.jvmux.network.balancer;
+
+public enum BalancingStrategy {
+    ROUND_ROBIN,
+    WEIGHTED_ROUND_ROBIN,
+    RANDOM,
+    WEIGHTED_RANDOM,
+    LEAST_CONNECTIONS,
+    WEIGHTED_LEAST_CONNECTIONS,
+    LEAST_RESPONSE_TIME,
+    PEAK_EWMA,
+    POWER_OF_TWO_CHOICES,
+    CONSISTENT_HASH,
+    IP_HASH
+}

@@ -13,16 +13,20 @@ public class DownstreamHandler implements AutoCloseable {
     private final Socket clientSocket;
     private final StreamPair pipe;
     private int requestCount = 0;
+    private boolean wannaClose = false;
 
     public DownstreamHandler(Socket clientSocket) throws IOException {
         this.clientSocket = clientSocket;
         this.pipe = StreamPair.from(this.clientSocket);
     }
 
-    public HttpRequest receive() throws IOException {
+    public HttpRequest receive() {
         try {
             var request = HttpServer.readRequest(pipe.in());
-            requestCount++;
+            if (request != null) {
+                requestCount++;
+                wannaClose = request.isCloseConnection();
+            }
             return request;
         } catch (Exception e) {
             forwardErr(e);
@@ -30,15 +34,24 @@ public class DownstreamHandler implements AutoCloseable {
         }
     }
 
-    public void forward(HttpResponse response) throws IOException {
-        if (requestCount == Constants.MAX_REQUESTS)
-            HttpServer.writeResponse(response.setAsLast(), pipe.out());
-        else
+    public void forward(HttpResponse response) {
+        boolean last = wannaClose || requestCount == Constants.MAX_REQUESTS || response.isCloseConnection();
+
+        if (last) response.setAsLast();
+
+        try {
             HttpServer.writeResponse(response, pipe.out());
+        } catch (IOException e) {
+            close();
+        }
+
+        if (last) close();
     }
 
-    public void forwardErr(Throwable error) throws IOException {
-        HttpServer.writeResponse(ErrorHandler.toResponse(error), pipe.out());
+    public void forwardErr(Throwable error) {
+        var response = ErrorHandler.toResponse(error);
+        response.setAsLast();
+        forward(response);
     }
 
     public boolean isConnected() {
@@ -46,9 +59,11 @@ public class DownstreamHandler implements AutoCloseable {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         if (!clientSocket.isClosed()) {
-            clientSocket.close();
+            try {
+                clientSocket.close();
+            } catch (IOException ignored) {}
         }
     }
 }

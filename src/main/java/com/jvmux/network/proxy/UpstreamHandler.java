@@ -1,5 +1,9 @@
 package com.jvmux.network.proxy;
 
+import com.jvmux.network.balancer.BalancingStrategy;
+import com.jvmux.network.balancer.LoadBalancer;
+import com.jvmux.network.balancer.LoadBalancerFactory;
+import com.jvmux.network.balancer.SelectionContext;
 import com.jvmux.network.http.constant.HttpHeader;
 import com.jvmux.network.http.exception.HttpException;
 import com.jvmux.network.http.io.HttpClient;
@@ -14,19 +18,33 @@ import com.jvmux.network.model.Server;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.util.Objects;
 
 public class UpstreamHandler implements AutoCloseable {
     private static final int MAX_ATTEMPTS = 2;
+    private static final BalancingStrategy STRATEGY = BalancingStrategy.ROUND_ROBIN;
+    private static final LoadBalancer DEFAULT_LOAD_BALANCER = LoadBalancerFactory.create(STRATEGY);
+
     private final RouteTree routeTree;
+    private final Client client;
+    private final LoadBalancer loadBalancer;
     private Cluster currentCluster;
     private Socket upstreamSocket;
     private Server currentServer;
-    private final Client client;
     private StreamPair pipe;
 
-    public UpstreamHandler(RouteTree routeTree, Client clientContext) {
+    public UpstreamHandler(RouteTree routeTree, Client clientContext, LoadBalancer loadBalancer) {
         this.routeTree = routeTree;
         this.client = clientContext;
+        this.loadBalancer = Objects.requireNonNull(loadBalancer, "loadBalancer cannot be null");
+    }
+
+    public UpstreamHandler(RouteTree routeTree, Client clientContext, BalancingStrategy strategy) {
+        this(routeTree, clientContext, LoadBalancerFactory.create(strategy));
+    }
+
+    public UpstreamHandler(RouteTree routeTree, Client clientContext) {
+        this(routeTree, clientContext, DEFAULT_LOAD_BALANCER);
     }
 
     public HttpResponse forward(HttpRequest request) {
@@ -59,16 +77,20 @@ public class UpstreamHandler implements AutoCloseable {
         request = HttpTransformer.prepareForUpstream(request, this.currentServer, this.client);
         HttpClient.writeRequest(request, pipe.out());
 
+        long start = System.nanoTime();
         var response = HttpClient.readResponse(pipe.in());
+        long responseTimeNanos = System.nanoTime() - start;
 
         if (response == null) {
             return null;
         }
 
+        this.currentServer.recordResponseTime(responseTimeNanos);
+
         return HttpTransformer.prepareForDownstream(
                 response,
                 request.getHeader(HttpHeader.HOST),
-                this.currentServer.url()
+                this.currentServer.getUrl()
         );
     }
 
@@ -87,13 +109,23 @@ public class UpstreamHandler implements AutoCloseable {
         if (this.currentCluster != targetCluster || upstreamSocket == null || upstreamSocket.isClosed()) {
             close();
             this.currentCluster = targetCluster;
-            this.currentServer = targetCluster.getRandomServer();
+
+            var context = this.client != null
+                    ? new SelectionContext(this.client.clientIp())
+                    : SelectionContext.empty();
+
+            try {
+                this.currentServer = this.loadBalancer.select(targetCluster, context);
+            } catch (IllegalStateException e) {
+                throw HttpException.badGateway("No healthy servers in cluster: " + targetCluster.name(), e);
+            }
 
             try {
                 this.upstreamSocket = TCPClient.connect(
-                        this.currentServer.host(),
-                        this.currentServer.port()
+                        this.currentServer.getHost(),
+                        this.currentServer.getPort()
                 );
+                this.currentServer.incConns();
                 this.pipe = StreamPair.from(this.upstreamSocket);
             } catch (SocketTimeoutException e) {
                 throw HttpException.gatewayTimeout(e);
@@ -107,12 +139,13 @@ public class UpstreamHandler implements AutoCloseable {
 
     @Override
     public void close() {
-        if (this.upstreamSocket != null) {
+        if (this.upstreamSocket != null && !this.upstreamSocket.isClosed()) {
             try {
                 this.upstreamSocket.close();
-            } catch (IOException ignored) {}
-            this.upstreamSocket = null;
-            this.pipe = null;
+            } catch (IOException ignored) {
+            } finally {
+                this.currentServer.decConns();
+            }
         }
     }
 }

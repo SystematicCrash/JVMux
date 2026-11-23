@@ -64,6 +64,10 @@ public class HttpException extends RuntimeException {
         return new HttpException(502, "Bad Gateway Error");
     }
 
+    public static HttpException badGateway(String message) {
+        return new HttpException(502, message);
+    }
+
     public static HttpException badGateway(Throwable cause) {
         return new HttpException(502, "Bad Gateway Error", cause);
     }

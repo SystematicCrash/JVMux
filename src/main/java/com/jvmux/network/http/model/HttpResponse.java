@@ -2,7 +2,7 @@ package com.jvmux.network.http.model;
 
 import com.jvmux.network.http.body.BodyWriter;
 import com.jvmux.network.http.body.BodyWriterFactory;
-import com.jvmux.network.http.codec.format.HeaderFormatter;
+import com.jvmux.network.http.codec.encode.HeaderEncoder;
 import com.jvmux.network.http.codec.payload.HtmlEncoder;
 import com.jvmux.network.http.codec.payload.JsonEncoder;
 import com.jvmux.network.http.codec.payload.PayloadEncoder;
@@ -107,12 +107,14 @@ public class HttpResponse {
 
     private void applyDefaultFraming() {
         setHeader(HttpHeader.SERVER, "JVMux");
-        setHeader(HttpHeader.CONNECTION, "keep-alive");
+
+        if (!hasHeader(HttpHeader.CONNECTION))
+            setHeader(HttpHeader.CONNECTION, "keep-alive");
 
         if (!hasHeader(HttpHeader.DATE))
-            setHeader(HttpHeader.DATE, HeaderFormatter.formatDate());
+            setHeader(HttpHeader.DATE, HeaderEncoder.formatDate());
 
-        setHeader(HttpHeader.KEEP_ALIVE, HeaderFormatter.formatKeepAlive());
-        setHeader(HttpHeader.VIA, HeaderFormatter.formatVia(getHeader(HttpHeader.VIA)));
+        setHeader(HttpHeader.KEEP_ALIVE, HeaderEncoder.formatKeepAlive());
+        setHeader(HttpHeader.VIA, HeaderEncoder.formatVia(getHeader(HttpHeader.VIA)));
     }
 }

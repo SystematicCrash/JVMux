@@ -1,5 +1,7 @@
 package com.jvmux.network.proxy;
 
+import com.jvmux.network.balancer.BalancingStrategy;
+import com.jvmux.network.balancer.LoadBalancer;
 import com.jvmux.network.http.model.HttpRequest;
 import com.jvmux.network.http.model.HttpResponse;
 import com.jvmux.network.model.Client;
@@ -18,6 +20,16 @@ public class ProxyRelay implements Runnable, AutoCloseable {
         this.upstream = new UpstreamHandler(routeTree, Client.from(clientSocket));
     }
 
+    public ProxyRelay(Socket clientSocket, RouteTree routeTree, LoadBalancer loadBalancer) throws IOException {
+        this.downstream = new DownstreamHandler(clientSocket);
+        this.upstream = new UpstreamHandler(routeTree, Client.from(clientSocket), loadBalancer);
+    }
+
+    public ProxyRelay(Socket clientSocket, RouteTree routeTree, BalancingStrategy strategy) throws IOException {
+        this.downstream = new DownstreamHandler(clientSocket);
+        this.upstream = new UpstreamHandler(routeTree, Client.from(clientSocket), strategy);
+    }
+
     @Override
     public void run() {
         try (this) {
@@ -25,38 +37,30 @@ public class ProxyRelay implements Runnable, AutoCloseable {
         } catch (Exception ignored) {}
     }
 
-    private void connectionLoop() throws IOException {
+    private void connectionLoop() {
         while (downstream.isConnected()) {
             HttpRequest request = downstream.receive();
+
             if (request == null) {
                 break;
             }
 
             try {
                 HttpResponse response = upstream.forward(request);
-
-                boolean clientClose = request.isCloseConnection();
-
-                if (clientClose) {
-                    response.setAsLast();
-                }
                 downstream.forward(response);
 
-                boolean upstreamClose = response.isCloseConnection();
-
-                if (upstreamClose) upstream.close();
-                if (clientClose) break;
-
+                if (response.isCloseConnection()) {
+                    upstream.close();
+                }
             } catch (Exception e) {
                 downstream.forwardErr(e);
-                upstream.close();
                 break;
             }
         }
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         try {
             upstream.close();
         } finally {
