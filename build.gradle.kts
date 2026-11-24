@@ -11,6 +11,7 @@ group = "com.jvmux"
 version = "1.0-SNAPSHOT"
 
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 
@@ -24,6 +25,7 @@ dependencies {
     testCompileOnly("org.projectlombok:lombok:1.18.36")
     testAnnotationProcessor("org.projectlombok:lombok:1.18.36")
     implementation("org.lz4:lz4-java:1.8.0")
+    implementation("org.yaml:snakeyaml:2.4")
 }
 
 tasks.test {
