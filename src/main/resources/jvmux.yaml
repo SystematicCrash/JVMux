@@ -129,18 +129,21 @@ clusters:
         healthy: true
 
 routes:
-  - path: "/api/v1/catalog/*"
+  - path: "/api/v1/catalog"
     cluster: "catalog-cluster"
     methods: ["GET"]
-  - path: "/api/v1/payments/*"
+  - path: "/api/v1/payments"
     cluster: "payments-cluster"
     methods: ["POST", "PUT"]
-  - path: "/auth/*"
+  - path: "/auth"
     cluster: "auth-cluster"
     methods: ["POST"]
-  - path: "/compute/*"
+  - path: "/compute"
     cluster: "compute-cluster"
     methods: ["POST", "GET"]
-  - path: "/*"
+  - path: "/api"
+    cluster: "default-api-cluster"
+    methods: ["ANY"]
+  - path: "/"
     cluster: "default-api-cluster"
     methods: ["ANY"]
