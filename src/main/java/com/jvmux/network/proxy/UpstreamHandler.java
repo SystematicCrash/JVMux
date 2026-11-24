@@ -44,7 +44,9 @@ public class UpstreamHandler implements AutoCloseable {
     }
 
     public UpstreamHandler(RouteTree routeTree, Client clientContext) {
-        this(routeTree, clientContext, DEFAULT_LOAD_BALANCER);
+        this.routeTree = routeTree;
+        this.client = clientContext;
+        this.loadBalancer = null;
     }
 
     public HttpResponse forward(HttpRequest request) {
@@ -114,8 +116,12 @@ public class UpstreamHandler implements AutoCloseable {
                     ? new SelectionContext(this.client.clientIp())
                     : SelectionContext.empty();
 
+            LoadBalancer balancer = this.loadBalancer != null
+                    ? this.loadBalancer
+                    : LoadBalancerFactory.create(targetCluster.strategy());
+
             try {
-                this.currentServer = this.loadBalancer.select(targetCluster, context);
+                this.currentServer = balancer.select(targetCluster, context);
             } catch (IllegalStateException e) {
                 throw HttpException.badGateway("No healthy servers in cluster: " + targetCluster.name(), e);
             }

@@ -1,0 +1,146 @@
+# JVMux Configuration
+# Declarative configuration for proxy listener, upstream clusters, and routes
+
+listener:
+  host: "0.0.0.0"
+  port: 8080
+  backlog: 1024
+  max_requests_per_connection: 1000
+
+clusters:
+  # Cluster with default load balancing strategy (Round Robin)
+  - name: "default-api-cluster"
+    servers:
+      - host: "127.0.0.1"
+        port: 8081
+        weight: 1
+        healthy: true
+      - host: "127.0.0.1"
+        port: 8082
+        weight: 1
+        healthy: true
+
+  # Cluster with explicit Round Robin strategy
+  - name: "catalog-cluster"
+    strategy: "ROUND_ROBIN"
+    servers:
+      - host: "10.0.0.11"
+        port: 8080
+        weight: 1
+        healthy: true
+      - host: "10.0.0.12"
+        port: 8080
+        weight: 1
+        healthy: true
+
+  # Cluster with Weighted Round Robin strategy
+  - name: "payments-cluster"
+    strategy: "WEIGHTED_ROUND_ROBIN"
+    servers:
+      - host: "10.0.1.10"
+        port: 9000
+        weight: 5
+        healthy: true
+      - host: "10.0.1.20"
+        port: 9000
+        weight: 3
+        healthy: true
+      - host: "10.0.1.30"
+        port: 9000
+        weight: 2
+        healthy: true
+
+  # Cluster with Least Connections strategy
+  - name: "compute-cluster"
+    strategy: "LEAST_CONNECTIONS"
+    servers:
+      - host: "192.168.1.50"
+        port: 8000
+        weight: 1
+        healthy: true
+      - host: "192.168.1.51"
+        port: 8000
+        weight: 1
+        healthy: true
+
+  # Cluster with Weighted Least Connections strategy
+  - name: "orders-cluster"
+    strategy: "WEIGHTED_LEAST_CONNECTIONS"
+    servers:
+      - host: "192.168.2.10"
+        port: 8000
+        weight: 4
+        healthy: true
+      - host: "192.168.2.20"
+        port: 8000
+        weight: 2
+        healthy: true
+
+  # Cluster with Consistent Hashing (XxHash64 virtual node ring)
+  - name: "session-cache-cluster"
+    strategy: "CONSISTENT_HASH"
+    servers:
+      - host: "10.0.2.1"
+        port: 6379
+        weight: 1
+        healthy: true
+      - host: "10.0.2.2"
+        port: 6379
+        weight: 1
+        healthy: true
+
+  # Cluster with IP Hash strategy (sticky client IP routing)
+  - name: "auth-cluster"
+    strategy: "IP_HASH"
+    servers:
+      - host: "10.0.3.1"
+        port: 8443
+        weight: 1
+        healthy: true
+      - host: "10.0.3.2"
+        port: 8443
+        weight: 1
+        healthy: true
+
+  # Cluster with Latency-Aware Peak EWMA strategy
+  - name: "analytics-cluster"
+    strategy: "PEAK_EWMA"
+    servers:
+      - host: "10.0.4.1"
+        port: 7000
+        weight: 1
+        healthy: true
+      - host: "10.0.4.2"
+        port: 7000
+        weight: 1
+        healthy: true
+
+  # Cluster with Power of Two Choices (P2C) strategy
+  - name: "media-cluster"
+    strategy: "POWER_OF_TWO_CHOICES"
+    servers:
+      - host: "10.0.5.1"
+        port: 9001
+        weight: 1
+        healthy: true
+      - host: "10.0.5.2"
+        port: 9001
+        weight: 1
+        healthy: true
+
+routes:
+  - path: "/api/v1/catalog/*"
+    cluster: "catalog-cluster"
+    methods: ["GET"]
+  - path: "/api/v1/payments/*"
+    cluster: "payments-cluster"
+    methods: ["POST", "PUT"]
+  - path: "/auth/*"
+    cluster: "auth-cluster"
+    methods: ["POST"]
+  - path: "/compute/*"
+    cluster: "compute-cluster"
+    methods: ["POST", "GET"]
+  - path: "/*"
+    cluster: "default-api-cluster"
+    methods: ["ANY"]
